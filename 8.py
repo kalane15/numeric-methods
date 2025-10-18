@@ -154,14 +154,14 @@ lambda2r2 = 0.1
 
 def main():
     initials = [
-        {"x1": -1.7, "x2": -1, "label": "Lower root", "l1": lambda1r1, "l2": lambda2r1},
-        {"x1": 1.248, "x2": 0.83, "label": "Upper root", "l1": lambda1r2, "l2": lambda2r2}
+        {"x1": -1.7, "x2": -1, "label": "Первый корень", "l1": lambda1r1, "l2": lambda2r1},
+        {"x1": 1.248, "x2": 0.83, "label": "Второй корень", "l1": lambda1r2, "l2": lambda2r2}
     ]
 
     # Run and print results
     for init in initials:
         print(f"\n--- {init['label']} ---")
-        print("Initial: x1={:.4f}, x2={:.4f}".format(init['x1'], init['x2']))
+        print("Приближение: x1={:.4f}, x2={:.4f}".format(init['x1'], init['x2']))
 
         if not check_convergence(init['x1'], init['x2'], init['l1'], init['l2']):
             print("Не выполнены условия сходимости")
@@ -169,18 +169,18 @@ def main():
 
         # Simple Iteration
         x1, x2, it = simple_iteration(init['x1'], init['x2'], init['l1'], init['l2'])
-        print(f"Simple: x1={x1 :.6f}, x2={x2 :.6f}, итераций={it}")
-        print(f"f1={f1(x1, x2):.2e}, f2={f2(x1, x2):.2e}\n")
+        print(f"Простой итерации: x1={x1 :.6f}, x2={x2 :.6f}, итераций={it}")
+        print(f"f1={round(f1(x1, x2), 2)}, f2={round(f2(x1, x2), 2)}\n")
 
         # Seidel method
         x1, x2, it = seidel_method(init['x1'], init['x2'], init['l1'], init['l2'])
-        print(f"Seidel: x1={x1:.6f}, x2={x2:.6f}, итераций={it}")
-        print(f"f1={f1(x1, x2):.2e}, f2={f2(x1, x2):.2e}\n")
+        print(f"Метод зейделя: x1={x1:.6f}, x2={x2:.6f}, итераций={it}")
+        print(f"f1={round(f1(x1, x2), 2)}, f2={round(f2(x1, x2), 2)}\n")
 
         # Newton's method
         x1, x2, it_n = newton_method(init['x1'], init['x2'], init['l1'], init['l2'])
-        print("Newton: x1={:.6f}, x2={:.6f}, iterations={}".format(x1, x2, it_n))
-        print(f"f1={f1(x1, x2):.2e}, f2={f2(x1, x2):.2e}\n")
+        print("Метод Ньютона: x1={:.6f}, x2={:.6f}, iterations={}".format(x1, x2, it_n))
+        print(f"f1={round(f1(x1, x2), 2)}, f2={round(f2(x1, x2), 2)}\n")
 
     return True
 

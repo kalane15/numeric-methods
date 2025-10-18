@@ -76,11 +76,10 @@ def dichotomy(a, b) -> tuple[int, int]:
     return (a + b) / 2, it
 
 
-def simple_iteration(a, b, l) -> tuple[int, int]:
+def simple_iteration(a, b, l):
     x_n = np.linspace(a, b, 100)
     max_dphi = max(dphi(xi, l) for xi in x_n)
     if max_dphi >= 1 or f(a) * f(b) >= 0:
-        print(max_dphi)
         return None, 0
 
     it = 0
@@ -93,7 +92,7 @@ def simple_iteration(a, b, l) -> tuple[int, int]:
         x = x_new
 
 
-def newton(a, b) -> tuple[int, int]:
+def newton(a, b):
     if f(a) * f(b) >= 0:
         return None, 0
     x_n = np.linspace(a, b, 100)
@@ -112,7 +111,7 @@ def newton(a, b) -> tuple[int, int]:
         x = x_new
 
 
-def secant(a, b) -> tuple[int, int]:
+def secant(a, b):
     if f(a) * f(b) >= 0:
         return None, 0
     x_n = np.linspace(a, b, 100)
@@ -132,7 +131,7 @@ def secant(a, b) -> tuple[int, int]:
     return x, it
 
 
-def hord(a, b) -> tuple[int, int]:
+def hord(a, b):
     if f(a) * f(b) >= 0:
         return None, 0
     x_n = np.linspace(a, b, 100)
@@ -152,13 +151,17 @@ def hord(a, b) -> tuple[int, int]:
         x = x_new
 
 
-def calc(metod, a, b, l=0.0, phi=None, dphi=None):
+def calc(metod, a, b, l=0.0):
     if metod == simple_iteration:
         root, iter = metod(a, b, l)
     else:
         root, iter = metod(a, b)
-    print(f"\tThe root {root:.7g} was found in {iter} iterations")
-    print(f"\tf(root) = {f(root):.7g}")
+
+    if root is None:
+        print("Условия не выполнены")
+    else:
+        print(f"\tКорень {root:.7g} был найден за {iter} итераци")
+        print(f"\t Проверка: f(root) = {round(f(root), 2)}")
 
 
 def main():
@@ -166,29 +169,29 @@ def main():
     a_pos, b_pos = 1.1, 1.3
     c, d = -1.1, -0.5
     draw()
-    print(f"An initial approximation for the roots [{a_neg}, {b_neg}] and [{a_pos}, {b_pos}]\n")
+    print(f"Изначальное приближение[{a_neg}, {b_neg}]; [{a_pos}, {b_pos}]; [{c}, {d}]\n")
 
-    print("Dichotomy:")
+    print("Деление пополам:")
     calc(dichotomy, a_neg, b_neg)
     calc(dichotomy, a_pos, b_pos)
     calc(dichotomy, c, d)
 
-    print("Simple iteration:")
+    print("Простая итерация:")
     calc(simple_iteration, a_neg, b_neg, 0.1)
     calc(simple_iteration, a_pos, b_pos, 0.1)
     calc(simple_iteration, c, d, -0.1)
 
-    print("Newton:")
+    print("Метод Ньютона:")
     calc(newton, a_neg, b_neg)
     calc(newton, a_pos, b_pos)
     calc(newton, c, d)
 
-    print("Secant:")
+    print("Метод секущих:")
     calc(secant, a_neg, b_neg)
     calc(secant, a_pos, b_pos)
     calc(secant, c, d)
 
-    print("Hord:")
+    print("Метод хорд:")
     calc(hord, a_neg, b_neg)
     calc(hord, a_pos, b_pos)
     calc(hord, c, d)
