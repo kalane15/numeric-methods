@@ -18,20 +18,12 @@ def d2f(x):
     return -e ** x - 6 * x - 6
 
 
-def phi_neg(x: float) -> float:
-    return x + 0.1 * f(x)
+def phi(x: float, l) -> float:
+    return x + l * f(x)
 
 
-def dphi_neg(x: float) -> float:
-    return 1 + 0.1 * df(x)
-
-
-def phi_pos(x: float) -> float:
-    return x + 0.1 * f(x)
-
-
-def dphi_pos(x: float) -> float:
-    return 1 - (-0.1) * df(x)
+def dphi(x: float, l) -> float:
+    return 1 + l * df(x)
 
 
 def draw() -> None:
@@ -47,6 +39,7 @@ def draw() -> None:
     plt.title('График функции f(x)')
     plt.legend()
     plt.show()
+
 
 def draw2() -> None:
     x_plot = np.linspace(-10, 10, 10000)
@@ -83,18 +76,18 @@ def dichotomy(a, b) -> tuple[int, int]:
     return (a + b) / 2, it
 
 
-def simple_iteration(phi, dphi, a, b) -> tuple[int, int]:
+def simple_iteration(a, b, l) -> tuple[int, int]:
     x_n = np.linspace(a, b, 100)
-    max_dphi = max(dphi(xi) for xi in x_n)
+    max_dphi = max(dphi(xi, l) for xi in x_n)
     if max_dphi >= 1 or f(a) * f(b) >= 0:
         print(max_dphi)
         return None, 0
 
     it = 0
-    x = phi((a + b) / 2)
+    x = phi((a + b) / 2, l)
     while True:
         it += 1
-        x_new = phi(x)
+        x_new = phi(x, l)
         if abs(x - x_new) < EPSILON:
             return x_new, it
         x = x_new
@@ -159,9 +152,9 @@ def hord(a, b) -> tuple[int, int]:
         x = x_new
 
 
-def calc(metod, a, b, phi=None, dphi=None):
+def calc(metod, a, b, l=0.0, phi=None, dphi=None):
     if metod == simple_iteration:
-        root, iter = metod(phi, dphi, a, b)
+        root, iter = metod(a, b, l)
     else:
         root, iter = metod(a, b)
     print(f"\tThe root {root:.7g} was found in {iter} iterations")
@@ -171,28 +164,34 @@ def calc(metod, a, b, phi=None, dphi=None):
 def main():
     a_neg, b_neg = -3.79, -3.5
     a_pos, b_pos = 1.1, 1.3
+    c, d = -1.1, -0.5
     draw()
     print(f"An initial approximation for the roots [{a_neg}, {b_neg}] and [{a_pos}, {b_pos}]\n")
 
     print("Dichotomy:")
     calc(dichotomy, a_neg, b_neg)
     calc(dichotomy, a_pos, b_pos)
+    calc(dichotomy, c, d)
 
     print("Simple iteration:")
-    calc(simple_iteration, a_neg, b_neg, phi_neg, dphi_neg)
-    calc(simple_iteration, a_pos, b_pos, phi_pos, dphi_pos)
+    calc(simple_iteration, a_neg, b_neg, 0.1)
+    calc(simple_iteration, a_pos, b_pos, 0.1)
+    calc(simple_iteration, c, d, -0.1)
 
     print("Newton:")
     calc(newton, a_neg, b_neg)
     calc(newton, a_pos, b_pos)
+    calc(newton, c, d)
 
     print("Secant:")
     calc(secant, a_neg, b_neg)
     calc(secant, a_pos, b_pos)
+    calc(secant, c, d)
 
     print("Hord:")
     calc(hord, a_neg, b_neg)
     calc(hord, a_pos, b_pos)
+    calc(hord, c, d)
 
 
 if __name__ == "__main__":
