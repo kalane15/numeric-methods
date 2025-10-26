@@ -108,7 +108,7 @@ def main():
     print("")
 
     print("Определитель A:")
-    print(Det(extended_matrix))
+    print(round(Det(extended_matrix), 4))
     print("")
 
     extended_matrix = SolveBackwardSubstitution(extended_matrix)

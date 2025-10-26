@@ -29,8 +29,11 @@ def dphi(x: float, l) -> float:
 def draw() -> None:
     x_plot = np.linspace(-6, 4, 10000)
     y_plot = f(x_plot)
-
+    z_plot = []
+    for i in x_plot:
+        z_plot.append(d2f(i))
     plt.plot(x_plot, y_plot, label='f(x)')
+    # plt.plot(x_plot, z_plot, label='d2f(x)')
     plt.axhline(0, color='k', linestyle='--')
     plt.axvline(0, color='k', linestyle='--')
     plt.grid(True)
@@ -97,7 +100,7 @@ def newton(a, b):
         return None, 0
     x_n = np.linspace(a, b, 100)
     for xi in x_n:
-        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2:
+        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2 or df(xi) == 0:
             print("sad")
             return None, 0
 
@@ -116,11 +119,19 @@ def secant(a, b):
         return None, 0
     x_n = np.linspace(a, b, 100)
     for xi in x_n:
-        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2:
+        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2 or df(xi) == 0:
             return None, 0
 
     it = 0
-    x_prev = a if f(a) * d2f(a) > 0 else b
+    if f(a) * d2f(a) > 0 and f(b) * d2f(b) > 0:
+        if abs(a) < abs(b):
+            x_prev = a
+        else:
+            x_prev = b
+    elif f(a) * d2f(a) > 0:
+        x_prev = a
+    else:
+        x_prev = b
     x = x_prev - f(x_prev) / df(x_prev)
 
     while abs(x - x_prev) > EPSILON:
@@ -139,8 +150,19 @@ def hord(a, b):
         if abs(f(xi) * d2f(xi)) >= df(xi) ** 2:
             return None, 0
 
-    z = a if f(a) * d2f(a) > 0 else b
-    x = a if z == b else b
+    if f(a) * d2f(a) > 0 and f(b) * d2f(b) > 0:
+        if abs(a) < abs(b):
+            z = a
+            x = b
+        else:
+            z = b
+            x = a
+    elif f(a) * d2f(a) > 0:
+        z = a
+        x = b
+    else:
+        z = b
+        x = a
 
     it = 0
     while True:
