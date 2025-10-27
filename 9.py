@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def draw(x_quad, y_quad, x_cub, y_cub, x_star, p2_star, p3_star, omega2, omega3, r2_bound, r3_bound):
-    x_table = [0.55, 0.98, 1.41, 1.84, 2.27, 2.70, 3.13, 3.56, 3.99]
-    y_table = [-3.2148, -1.5896, -1.9871, -1.4457, -1.9436, -2.0365, -4.4549, -5.9831, -4.8239]
+x_table = [3.05, 3.43, 3.81, 4.19, 4.57, 4.95, 5.33, 5.71, 6.09]
+y_table = [1.8571, 2.1247, 3.6456, 2.6842, 2.3539, 0.3431, 1.6577, 2.8982, 1.4326]
 
+
+def draw(x_quad, y_quad, x_cub, y_cub, x_star, p2_star, p3_star, omega2, omega3, r2_bound, r3_bound):
     x_plot = np.linspace(0.5, 4.0, 200)
 
     y_quad_plot = [lagrange(x_quad, y_quad, x) for x in x_plot]
@@ -14,11 +15,12 @@ def draw(x_quad, y_quad, x_cub, y_cub, x_star, p2_star, p3_star, omega2, omega3,
     abs_omega3_plot = [abs(omega(x, x_cub)) for x in x_plot]
 
     _, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
-    
+
     ax1.plot(x_plot, y_quad_plot, 'b-', label='L₂(x)', linewidth=2)
     ax1.scatter(x_table, y_table, color='red', s=50, label='Table points', zorder=5)
     ax1.scatter(x_quad, y_quad, color='green', s=100, marker='o', label='Nodes for L₂', zorder=5)
-    ax1.scatter(x_star, p2_star, color='purple', s=80, marker='*', label=f'x* = {x_star}, L₂(x*) ≈ {p2_star:.4f}', zorder=5)
+    ax1.scatter(x_star, p2_star, color='purple', s=80, marker='*', label=f'x* = {x_star}, L₂(x*) ≈ {p2_star:.4f}',
+                zorder=5)
     ax1.set_xlabel('x')
     ax1.set_ylabel('y')
     ax1.set_title('Lagrange Interpolation Polynomial of 2nd Degree')
@@ -33,15 +35,16 @@ def draw(x_quad, y_quad, x_cub, y_cub, x_star, p2_star, p3_star, omega2, omega3,
     ax2.set_title('Polynomial for Error Estimation (n=2)')
     ax2.legend()
     ax2.grid(True, alpha=0.3)
-    
+
     plt.show()
 
     _, (ax3, ax4) = plt.subplots(2, 1, figsize=(10, 8))
-    
+
     ax3.plot(x_plot, y_cub_plot, 'g-', label='L₃(x)', linewidth=2)
     ax3.scatter(x_table, y_table, color='red', s=50, label='Table points', zorder=5)
     ax3.scatter(x_cub, y_cub, color='orange', s=100, marker='s', label='Nodes for L₃', zorder=5)
-    ax3.scatter(x_star, p3_star, color='purple', s=80, marker='*', label=f'x* = {x_star}, L₃(x*) ≈ {p3_star:.4f}', zorder=5)
+    ax3.scatter(x_star, p3_star, color='purple', s=80, marker='*', label=f'x* = {x_star}, L₃(x*) ≈ {p3_star:.4f}',
+                zorder=5)
     ax3.set_xlabel('x')
     ax3.set_ylabel('y')
     ax3.set_title('Lagrange Interpolation Polynomial of 3rd Degree')
@@ -56,8 +59,9 @@ def draw(x_quad, y_quad, x_cub, y_cub, x_star, p2_star, p3_star, omega2, omega3,
     ax4.set_title('Polynomial for Error Estimation (n=3)')
     ax4.legend()
     ax4.grid(True, alpha=0.3)
-    
+
     plt.show()
+
 
 def l_i(x, x_vals, i):
     """
@@ -71,6 +75,7 @@ def l_i(x, x_vals, i):
             prod *= (x - x_vals[j]) / (x_vals[i] - x_vals[j])
     return prod
 
+
 def lagrange(x_vals, y_vals, x):
     """
     Interpolation polynomial L_n(x):
@@ -81,6 +86,7 @@ def lagrange(x_vals, y_vals, x):
     for i in range(n):
         result += y_vals[i] * l_i(x, x_vals, i)
     return result
+
 
 def omega(x, x_vals):
     """
@@ -94,15 +100,16 @@ def omega(x, x_vals):
 
 def main():
     # Points for the 2nd degree polynomial (n=2, indices i=1,2,3 in the table)
-    x_quad = [0.98, 1.41, 1.84]
-    y_quad = [-1.5896, -1.9871, -1.4457]
+    x_quad = [x_table[1], x_table[2], x_table[3]]
+    y_quad = [y_table[1], y_table[2], y_table[3]]
 
     # Points for the 3rd degree polynomial (n=3, indices i=1,2,3,4)
-    x_cub = [0.98, 1.41, 1.84, 2.27]
-    y_cub = [-1.5896, -1.9871, -1.4457, -1.9436]
+    x_cub = [x_table[1], x_table[2], x_table[3], x_table[4]]
+    y_cub = [y_table[1], y_table[2], y_table[3], y_table[4]]
 
-    x_star = 1.479
-    x_check = 1.41
+    x_star = 4.016
+    x_check = x_table[2]
+    y_check = y_table[2]
 
     p2_star = lagrange(x_quad, y_quad, x_star)
     p3_star = lagrange(x_cub, y_cub, x_star)
@@ -116,16 +123,17 @@ def main():
     r3_bound = omega3 / 24  # 4! = 24
 
     print(f"Value of L_2(x*) = {p2_star}")
-    print(f"Check: L_2(x_check) = {p2_check} (expected: -1.9871)")
+    print(f"Check: L_2({x_check}) = {p2_check} (expected: {y_check})")
     print(f"|ω_3(x*)| = {omega2}")
     print(f"Bound for |R_2(x*)| ≤ (M / 6) * |ω_3(x*)| = {r2_bound} * M \n")
 
     print(f"Value of L_3(x*) = {p3_star}")
-    print(f"Check: L_3(x_check) = {p3_check} (expected: -1.9871)")
+    print(f"Check: L_3({x_check}) = {p3_check} (expected: {y_check})")
     print(f"|ω_4(x*)| = {omega3}")
     print(f"Bound for |R_3(x*)| ≤ (M / 24) * |ω_4(x*)| = {r3_bound} * M")
-    
+
     draw(x_quad, y_quad, x_cub, y_cub, x_star, p2_star, p3_star, omega2, omega3, r2_bound, r3_bound)
+
 
 if __name__ == "__main__":
     main()
