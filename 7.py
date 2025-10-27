@@ -80,13 +80,8 @@ def dichotomy(a, b) -> tuple[int, int]:
 
 
 def simple_iteration(a, b, l):
-    x_n = np.linspace(a, b, 100)
-    max_dphi = max(dphi(xi, l) for xi in x_n)
-    if max_dphi >= 1 or f(a) * f(b) >= 0:
-        return None, 0
-
     it = 0
-    x = phi((a + b) / 2, l)
+    ok, x = check_conditions(f, a, b, l)
     while True:
         it += 1
         x_new = phi(x, l)
@@ -95,7 +90,7 @@ def simple_iteration(a, b, l):
         x = x_new
 
 
-def newton(a, b):
+def newton(a, b, x0):
     if f(a) * f(b) >= 0:
         return None, 0
     x_n = np.linspace(a, b, 100)
@@ -104,8 +99,8 @@ def newton(a, b):
             print("sad")
             return None, 0
 
-    x = a if f(a) * d2f(a) > 0 else b
     it = 0
+    x = x0
     while True:
         x_new = x - f(x) / df(x)
         it += 1
@@ -114,7 +109,7 @@ def newton(a, b):
         x = x_new
 
 
-def secant(a, b):
+def secant(a, b, x0):
     if f(a) * f(b) >= 0:
         return None, 0
     x_n = np.linspace(a, b, 100)
@@ -123,15 +118,8 @@ def secant(a, b):
             return None, 0
 
     it = 0
-    if f(a) * d2f(a) > 0 and f(b) * d2f(b) > 0:
-        if abs(a) < abs(b):
-            x_prev = a
-        else:
-            x_prev = b
-    elif f(a) * d2f(a) > 0:
-        x_prev = a
-    else:
-        x_prev = b
+    x_prev = x0
+
     x = x_prev - f(x_prev) / df(x_prev)
 
     while abs(x - x_prev) > EPSILON:
@@ -142,7 +130,41 @@ def secant(a, b):
     return x, it
 
 
-def hord(a, b):
+def find_root_intervals(x_start, x_end, dx=0.5) -> list:
+    intervals = []
+    x_values = np.arange(x_start, x_end + dx, dx)
+
+    for i in range(len(x_values) - 1):
+        a = x_values[i]
+        b = x_values[i + 1]
+        fa = f(a)
+        fb = f(b)
+
+        if fa * fb < 0:  # проверка изменения знака
+            fpp_a = d2f(a)
+            fpp_b = d2f(b)
+
+            cond_a = abs(fa * fpp_a) < (d2f(a)) ** 2
+            cond_b = abs(fb * fpp_b) < (d2f(b)) ** 2
+            if not (cond_a or cond_b):
+                print("Достаточное условие сходимости не выполнено, сходимость не гарантируется!")
+
+            if fa * fpp_a > 0 and fb * fpp_b > 0:
+                if abs(fa) <= abs(fb):
+                    x0 = a
+                else:
+                    x0 = b
+            elif fa * fpp_a > 0:
+                x0 = a
+            elif fb * fpp_b > 0:
+                x0 = b
+
+            intervals.append({'a': a, 'b': b, 'x0': x0})
+
+    return intervals
+
+
+def hord(a, b, x0):
     if f(a) * f(b) >= 0:
         return None, 0
     x_n = np.linspace(a, b, 100)
@@ -150,19 +172,19 @@ def hord(a, b):
         if abs(f(xi) * d2f(xi)) >= df(xi) ** 2:
             return None, 0
 
-    if f(a) * d2f(a) > 0 and f(b) * d2f(b) > 0:
-        if abs(a) < abs(b):
-            z = a
-            x = b
-        else:
-            z = b
-            x = a
-    elif f(a) * d2f(a) > 0:
+    if x0 == a:
         z = a
         x = b
-    else:
+    elif x0 == b:
         z = b
         x = a
+    else:
+        if abs(f(a)) <= abs(f(b)):
+            z = x0
+            x = a
+        else:
+            z = x0
+            x = b
 
     it = 0
     while True:
@@ -173,11 +195,13 @@ def hord(a, b):
         x = x_new
 
 
-def calc(metod, a, b, l=0.0):
+def calc(metod, a, b, x0=0.0, l=0.0):
     if metod == simple_iteration:
         root, iter = metod(a, b, l)
-    else:
+    elif metod == dichotomy:
         root, iter = metod(a, b)
+    else:
+        root, iter = metod(a, b, x0)
 
     if root is None:
         print("Условия не выполнены")
@@ -186,37 +210,69 @@ def calc(metod, a, b, l=0.0):
         print(f"\t Проверка: f(root) = {round(f(root), 2)}")
 
 
+def check_conditions(f, a, b, l):
+    x0 = 0
+    # 1) f(a)*f(b) < 0
+    if f(a) * f(b) >= 0:
+        raise Exception(f"Условие f(a)*f(b)<0 не выполнено на [{a}, {b}]!")
+
+    # 2) |φ'(x)| ≤ q < 1
+    d_phi_a = abs(dphi(a, l))
+    d_phi_b = abs(dphi(b, l))
+    q = max(d_phi_a, d_phi_b)
+    if (int(q) == 1):
+        print("Сходимость не гарантирована (q = 1)!")
+        if d_phi_a < 1:
+            x0 = a
+        elif d_phi_b < 1:
+            x0 = b
+        else:
+            x0 = a
+        return True, x0
+    elif q > 1:
+        raise Exception(f"|φ'(x)| ≤ q < 1 не выполнено (q = {q:.3f})!")
+
+    if d_phi_a < 1:
+        x0 = a
+    elif d_phi_b < 1:
+        x0 = b
+
+    print(f"Условия f(a)*f(b)<0, |φ'(x)|={q:.3f}<1 выполнены.")
+    return True, x0
+
+
 def main():
     a_neg, b_neg = -3.79, -3.5
     a_pos, b_pos = 1.1, 1.3
     c, d = -1.1, -0.5
     draw()
-    print(f"Изначальное приближение[{a_neg}, {b_neg}]; [{a_pos}, {b_pos}]; [{c}, {d}]\n")
-
     print("Деление пополам:")
     calc(dichotomy, a_neg, b_neg)
     calc(dichotomy, a_pos, b_pos)
     calc(dichotomy, c, d)
 
     print("Простая итерация:")
-    calc(simple_iteration, a_neg, b_neg, 0.1)
-    calc(simple_iteration, a_pos, b_pos, 0.1)
-    calc(simple_iteration, c, d, -0.1)
+    calc(simple_iteration, a_neg, b_neg, l=0.1)
+    calc(simple_iteration, a_pos, b_pos, l=0.1)
+    calc(simple_iteration, c, d, l=-0.1)
+
+    ints = find_root_intervals(-6.0, 4.0)
+
+    if len(ints) == 0:
+        raise Exception("нет подходящих интервалов")
 
     print("Метод Ньютона:")
-    calc(newton, a_neg, b_neg)
-    calc(newton, a_pos, b_pos)
-    calc(newton, c, d)
+
+    for interval in ints:
+        calc(newton, interval['a'], interval['b'], interval['x0'])
 
     print("Метод секущих:")
-    calc(secant, a_neg, b_neg)
-    calc(secant, a_pos, b_pos)
-    calc(secant, c, d)
+    for interval in ints:
+        calc(secant, interval['a'], interval['b'], interval['x0'])
 
     print("Метод хорд:")
-    calc(hord, a_neg, b_neg)
-    calc(hord, a_pos, b_pos)
-    calc(hord, c, d)
+    for interval in ints:
+        calc(hord, interval['a'], interval['b'], interval['x0'])
 
 
 if __name__ == "__main__":

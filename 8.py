@@ -6,6 +6,7 @@ from math import e
 
 
 def draw():
+    return
     x1_range = np.linspace(-3, 3, 400)
     x2_range = np.linspace(-3, 3, 400)
     X1, X2 = np.meshgrid(x1_range, x2_range)
@@ -52,54 +53,58 @@ def df2_dx2(x1, x2):
     return -8 * x2
 
 
-def phi1(x1, x2, l):
-    return x1 + l * f1(x1, x2)
+def phi1(x1, x2):
+    if x2 < 0:
+        return -np.sqrt(x1 ** 2 + 1) / 2
+    else:
+        return np.sqrt(x1 ** 2 + 1) / 2
 
 
-def dphi1_dx1(x1, x2, l):
-    return 1 + l * df1_dx1(x1, x2)
+def dphi1_dx1(x1, x2):
+    if x2 < 0:
+        sign = -1
+    else:
+        sign = 1
+
+    return sign * (x1 / (2 * np.sqrt(x1 ** 2 + 1)))
 
 
-def dphi1_dx2(x1, x2, l):
-    return l * df1_dx2(x1, x2)
+def dphi1_dx2(x1, x2):
+    return 0
 
 
-def phi2(x1, x2, l):
-    return x2 + l * f2(x1, x2)
+def phi2(x1, x2):
+    return np.log(4 - x1) / x1
 
 
-def dphi2_x1(x1, x2, l):
-    return l * df2_dx1(x1, x2)
+def dphi2_x1(x1, x2):
+    return (-x1 / (4 - x1) - np.log(4 - x1)) / x1 ** 2
 
 
-def dphi2_x2(x1, x2, l):
-    return 1 + l * df2_dx2(x1, x2)
+def dphi2_x2(x1, x2):
+    return 0
 
 
-def check_convergence(x1, x2, l1, l2):
-    a, b, c, d = (dphi1_dx1(x1, x2, l1),
-                  dphi1_dx2(x1, x2, l1),
-                  dphi2_x1(x1, x2, l2),
-                  dphi2_x2(x1, x2, l2))
+def check_convergence(x1, x2):
+    a, b, c, d = (dphi1_dx1(x1, x2),
+                  dphi1_dx2(x1, x2),
+                  dphi2_x1(x1, x2),
+                  dphi2_x2(x1, x2))
 
-    q1 = max(abs(a) + abs(b),
-             abs(c) + abs(d))
-    q2 = max(abs(a) + abs(c),
-             abs(b) + abs(d))
+    q1 = abs(a) + abs(b)
+    q2 = abs(b) + abs(d)
 
-    discriminant = (a + d) ** 2 - 4 * (a * d - b * c)
-    eig1 = ((a + d) + cmath.sqrt(discriminant)) / 2
-    eig2 = ((a + d) - cmath.sqrt(discriminant)) / 2
-    rho = max(abs(eig1), abs(eig2))
-    return rho < 1 or q1 < 1 or q2 < 1
+    q = max(q1, q2)
+
+    return q < 1
 
 
-def simple_iteration(x1, x2, l1, l2, eps=1e-4):
+def simple_iteration(x1, x2, eps=1e-4):
     it = 0
     while True:
         it += 1
-        x1_new = phi1(x1, x2, l1)
-        x2_new = phi2(x1, x2, l2)
+        x1_new = phi1(x1, x2)
+        x2_new = phi2(x1, x2)
 
         if max(abs(x1 - x1_new), abs(x2 - x2_new)) <= eps:
             return x1_new, x2_new, it
@@ -107,12 +112,12 @@ def simple_iteration(x1, x2, l1, l2, eps=1e-4):
         x2 = x2_new
 
 
-def seidel_method(x1, x2, l1, l2, eps=1e-4):
+def seidel_method(x1, x2, eps=1e-4):
     it = 0
     while True:
         it += 1
-        x1_new = phi1(x1, x2, l1)
-        x2_new = phi2(x1_new, x2, l2)
+        x1_new = phi1(x1, x2)
+        x2_new = phi2(x1_new, x2)
 
         if max(abs(x1 - x1_new), abs(x2 - x2_new)) <= eps:
             return x1_new, x2_new, it
@@ -120,7 +125,7 @@ def seidel_method(x1, x2, l1, l2, eps=1e-4):
         x2 = x2_new
 
 
-def newton_method(x1, x2, l1, l2, eps=1e-4):
+def newton_method(x1, x2, eps=1e-4):
     it = 0
     x1_pred = x1
     x2_pred = x2
@@ -146,16 +151,10 @@ def newton_method(x1, x2, l1, l2, eps=1e-4):
         x2_pred = x2
 
 
-lambda1r1 = 0.1
-lambda2r1 = -0.1
-lambda1r2 = -0.1
-lambda2r2 = 0.1
-
-
 def main():
     initials = [
-        {"x1": -1.7, "x2": -1, "label": "Первый корень", "l1": lambda1r1, "l2": lambda2r1},
-        {"x1": 1.248, "x2": 0.83, "label": "Второй корень", "l1": lambda1r2, "l2": lambda2r2}
+        {"x1": -1.7, "x2": -1, "label": "Первый корень"},
+        {"x1": 1.248, "x2": 0.83, "label": "Второй корень"}
     ]
 
     # Run and print results
@@ -163,22 +162,22 @@ def main():
         print(f"\n--- {init['label']} ---")
         print("Приближение: x1={:.4f}, x2={:.4f}".format(init['x1'], init['x2']))
 
-        if not check_convergence(init['x1'], init['x2'], init['l1'], init['l2']):
+        if not check_convergence(init['x1'], init['x2']):
             print("Не выполнены условия сходимости")
             return False
 
         # Simple Iteration
-        x1, x2, it = simple_iteration(init['x1'], init['x2'], init['l1'], init['l2'])
+        x1, x2, it = simple_iteration(init['x1'], init['x2'])
         print(f"Простой итерации: x1={x1 :.6f}, x2={x2 :.6f}, итераций={it}")
         print(f"f1={round(f1(x1, x2), 2)}, f2={round(f2(x1, x2), 2)}\n")
 
         # Seidel method
-        x1, x2, it = seidel_method(init['x1'], init['x2'], init['l1'], init['l2'])
+        x1, x2, it = seidel_method(init['x1'], init['x2'])
         print(f"Метод зейделя: x1={x1:.6f}, x2={x2:.6f}, итераций={it}")
         print(f"f1={round(f1(x1, x2), 2)}, f2={round(f2(x1, x2), 2)}\n")
 
         # Newton's method
-        x1, x2, it_n = newton_method(init['x1'], init['x2'], init['l1'], init['l2'])
+        x1, x2, it_n = newton_method(init['x1'], init['x2'])
         print("Метод Ньютона: x1={:.6f}, x2={:.6f}, iterations={}".format(x1, x2, it_n))
         print(f"f1={round(f1(x1, x2), 2)}, f2={round(f2(x1, x2), 2)}\n")
 
