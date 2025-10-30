@@ -11,10 +11,6 @@ def solve_tdma(a, b, c, d):
     """
     N = len(d)
 
-    for i in range(N):
-        if abs(b[i]) < abs(a[i]) + abs(c[i]) or abs(c[0] / b[0]) >= 1:
-            raise Exception("Условия для метода прогонки не выполнены")
-
     c_prime = [0.0] * N
     d_prime = [0.0] * N
 

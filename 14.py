@@ -125,7 +125,7 @@ print("=" * 105)
 for name, method, p in methods:
     I_h = method(a, b, h / 2)
     I_h2 = method(a, b, h)
-    I_refined = runge_romberg(I_h, I_h2, p)
+    I_refined = runge_romberg(I_h2, I_h, p)
     m1 = calculate_mistake(method, a, b, h)
     m2 = calculate_mistake(method, a, b, h / 2)
 
