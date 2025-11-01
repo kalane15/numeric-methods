@@ -8,7 +8,7 @@ def f(x):
             (3 * x ** 2 - math.cos(3 * x)) / math.log(x ** 3 + 3))
 
 
-def df(x):
+def df(x, h=0):
     # u = ln(5x^4 - 3x^2) / (2x^2 + sin(x/4))
     p = math.log(5 * x ** 4 - 3 * x ** 2)
     q = 2 * x ** 2 + math.sin(x / 4)
@@ -26,7 +26,7 @@ def df(x):
     return u_prime + v_prime
 
 
-def d2f(x):
+def d2f(x, h=0):
     # Для u''(x)
     p = math.log(5 * x ** 4 - 3 * x ** 2)
     q = 2 * x ** 2 + math.sin(x / 4)
@@ -61,6 +61,39 @@ def d2f(x):
     return u_double + v_double
 
 
+def d3f(x, h):
+    if round(x - h, 4) < round(x_start, 4):
+        return None
+    return (d2f(x) - d2f(x - h)) / h
+
+
+def d4f(x, h):
+    if round(x - h, 4) < round(x_start, 4):
+        return None
+    return (d3f(x, h) - d3f(x - h, h)) / h
+
+
+def d5f(x, h):
+    if round(x - h, 4) < round(x_start, 4):
+        return None
+    return (d4f(x, h) - d4f(x - h, h)) / h
+
+
+def d6f(x, h):
+    if round(x - h, 4) < round(x_start, 4):
+        return None
+    return (d5f(x, h) - d5f(x - h, h)) / h
+
+
+def find_max(func, a, b, h):
+    n = int((b - a) / h)
+    x_val = np.linspace(a, b, n)
+    mx = 0
+    for x in x_val:
+        mx = max(x, func(x))
+    return mx
+
+
 x_start = 1.0
 x_end = 4.0
 
@@ -69,6 +102,10 @@ def two_point_1(x, h):
     if round(x - h, 4) < round(x_start, 4):
         return None
     return (f(x) - f(x - h)) / h
+
+
+def two_point_1_error(x, h):
+    return h / 2 * abs(d2f(x, h))
 
 
 def two_point_2(x, h):
@@ -83,10 +120,18 @@ def two_point_3(x, h):
     return (f(x + h) - f(x - h)) / (2 * h)
 
 
+def two_point_3_error(x, h):
+    return h * h / 6 * abs(d2f(x, h))
+
+
 def three_point_4(x, h):
     if round(x + 2 * h, 4) > round(x_end, 4):
         return None
     return (-3 * f(x) + 4 * f(x + h) - f(x + 2 * h)) / (2 * h)
+
+
+def three_point_4_error(x, h):
+    return h * h / 3 * abs(d3f(x, h))
 
 
 def four_point_9(x, h):
@@ -95,10 +140,18 @@ def four_point_9(x, h):
     return (-2 * f(x - h) - 3 * f(x) + 6 * f(x + h) - f(x + 2 * h)) / (6 * h)
 
 
+def four_point_9_error(x, h):
+    return h ** 3 / 12 * abs(d3f(x, h))
+
+
 def five_point_19(x, h):
     if round(x + 4 * h, 4) > round(x_end, 4):
         return None
     return (-25 * f(x) + 48 * f(x + h) - 36 * f(x + 2 * h) + 16 * f(x + 3 * h) - 3 * f(x + 4 * h)) / (12 * h)
+
+
+def five_point_19_error(x, h):
+    return h ** 4 / 5 * abs(d5f(x, h))
 
 
 def three_point_d2f_7(x, h):
@@ -107,10 +160,18 @@ def three_point_d2f_7(x, h):
     return (f(x - 2 * h) - 2 * f(x - h) + f(x)) / (h * h)
 
 
+def three_point_d2f_7_error(x, h):
+    return h * abs(d3f(x, h))
+
+
 def three_point_d2f_8(x, h):
     if round(x - h, 4) < round(x_start, 4) or round(x + h, 4) > round(x_end, 4):
         return None
     return (f(x + h) - 2 * f(x) + f(x - h)) / (h * h)
+
+
+def three_point_d2f_8_error(x, h):
+    return h * h / 12 * abs(d4f(x, h))
 
 
 def four_point_d2f_16(x, h):
@@ -119,18 +180,21 @@ def four_point_d2f_16(x, h):
     return (2 * f(x) - 5 * f(x + h) + 4 * f(x + 2 * h) - f(x + 3 * h)) / (h * h)
 
 
+def four_point_d2f_16_error(x, h):
+    return 11 / 12 * h * h * abs(d4f(x, h))
+
+
 def five_point_d2f_23(x, h):
     if round(x + 2 * h, 4) > round(x_end, 4) or round(x - 2 * h, 4) < round(x_start, 4):
         return None
     return (-f(x + 2 * h) + 16 * f(x + h) - 30 * f(x) + 16 * f(x - h) - f(x - 2 * h)) / (12 * h * h)
 
 
+def five_point_d2f_23_error(x, h):
+    return h ** 4 / 90 * abs(d6f(x, h))
+
+
 def derivative(f_scheme, x, h):
-    """
-    f_scheme : функция, реализующая конкретную численную схему
-    x        : точка вычисления
-    h        : шаг
-    """
     return f_scheme(x, h)
 
 
@@ -148,7 +212,7 @@ def print_values(derivative_schemes, top_header, x_values, order, h):
     for x in x_values:
         res_str = "{:<10.2f}".format(x)  # выводим x с двумя знаками после запятой
 
-        for func, name in derivative_schemes:
+        for func, name, error in derivative_schemes:
             try:
                 res = derivative(func, x, h)
                 res_str += "{:<{width}.8f}".format(res, width=col_width)
@@ -157,6 +221,7 @@ def print_values(derivative_schemes, top_header, x_values, order, h):
                 res_str += "{:<{width}}".format("-", width=col_width)
 
         print(res_str)
+
     print('\n')
 
     for name in names:
@@ -181,7 +246,29 @@ def print_values(derivative_schemes, top_header, x_values, order, h):
     plt.grid(True)
     plt.legend()
     plt.show()
+    draw_errors(derivative_schemes, top_header, x_values, order, h)
 
+
+def draw_errors(derivative_schemes, top_header, x_values, order, h):
+    names = [i[1] for i in derivative_schemes]
+    num_values = {name: [] for name in names}
+    for func, name, error in derivative_schemes:
+        y_values = []
+        for x in x_values:
+            try:
+                res = error(x, h)
+                num_values[name].append((x, res))
+            except Exception:
+                pass
+    for name in names:
+        x = [i[0] for i in num_values[name]]
+        y = [i[1] for i in num_values[name]]
+        plt.plot(x, y, label=f"{name} error")
+    plt.title(f"Ошибка {top_header}. Шаг сетки h = {h}")
+    plt.xlabel("x")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 def main():
     h = 0.15
@@ -190,22 +277,22 @@ def main():
     x_values = np.linspace(x_start, x_end, num_points)
 
     derivative_schemes = [
-        (two_point_1, "One-point var 1"),
-        (two_point_2, "One-point var 2"),
-        (two_point_3, "One-point var 3"),
-        (three_point_4, "Three-point var 4"),
-        (four_point_9, "Four-point var 9"),
-        (five_point_19, "Five-point var 19")
+        (two_point_1, "One-point var 1", two_point_1_error),
+        (two_point_2, "One-point var 2", two_point_1_error),
+        (two_point_3, "One-point var 3", two_point_3_error),
+        (three_point_4, "Three-point var 4", three_point_4_error),
+        (four_point_9, "Four-point var 9", four_point_9_error),
+        (five_point_19, "Five-point var 19", five_point_19_error)
     ]
 
     print_values(derivative_schemes, "Первая производная", x_values, 1, h)
     print_values(derivative_schemes, "Первая производная", x_values, 1, h / 2.0)
 
     derivative_schemes2 = [
-        (three_point_d2f_7, "Three-point var 7"),
-        (three_point_d2f_8, "Three-point var 8"),
-        (four_point_d2f_16, "Four-point var 16"),
-        (five_point_d2f_23, "Five-point var 23")
+        (three_point_d2f_7, "Three-point var 7", three_point_d2f_7_error),
+        (three_point_d2f_8, "Three-point var 8", three_point_d2f_8_error),
+        (four_point_d2f_16, "Four-point var 16", four_point_d2f_16_error),
+        (five_point_d2f_23, "Five-point var 23", five_point_d2f_23_error)
     ]
     print_values(derivative_schemes2, "Вторая производная", x_values, 2, h)
     print_values(derivative_schemes2, "Вторая производная", x_values, 2, h / 2.0)
