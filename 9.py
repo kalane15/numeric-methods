@@ -6,7 +6,7 @@ y_table = [1.8571, 2.1247, 3.6456, 2.6842, 2.3539, 0.3431, 1.6577, 2.8982, 1.432
 
 
 def draw(x_quad, y_quad, x_cub, y_cub, x_star, p2_star, p3_star, omega2, omega3, r2_bound, r3_bound):
-    x_plot = np.linspace(0.5, 4.0, 200)
+    x_plot = np.linspace(x_table[0], x_table[-1], 200)
 
     y_quad_plot = [lagrange(x_quad, y_quad, x) for x in x_plot]
     y_cub_plot = [lagrange(x_cub, y_cub, x) for x in x_plot]

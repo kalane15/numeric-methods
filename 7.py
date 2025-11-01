@@ -227,7 +227,7 @@ def check_conditions(f, a, b, l):
         elif d_phi_b < 1:
             x0 = b
         else:
-            x0 = a
+            raise Exception("Условия не выполнены")
         return True, x0
     elif q > 1:
         raise Exception(f"|φ'(x)| ≤ q < 1 не выполнено (q = {q:.3f})!")

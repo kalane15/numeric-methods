@@ -13,7 +13,7 @@ def draw(x_quad, y_quad, dd_quad, x_cub, y_cub, dd_cub, x_star, p2_star, p3_star
     """
     # Full table of points
 
-    x_plot = np.linspace(0.5, 4.0, 200)
+    x_plot = np.linspace(x_table[0], x_table[-1], 200)
 
     # Compute polynomial values
     y_quad_plot = [newton_eval(x_quad, dd_quad, x, 2) for x in x_plot]
