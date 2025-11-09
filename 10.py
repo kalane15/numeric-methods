@@ -119,11 +119,25 @@ def main():
     print(f"Check: P_2({x_check}) = {p2_check} (expected: {y_check})")
     print(f"Approximate error |R_2(x*)| ≈ {r2_approx}\n")
 
+    draw(x_quad, y_quad, dd_quad, x_cub, y_cub, dd_cub, x_star, p2_star, p3_star, r2_approx, r3_approx)
+
+    x_quad2 = x_all[2:5]
+    y_quad2 = y_all[2:5]
+    dd_quad = divided_differences(x_quad2, y_quad2)
+    p2_star2 = newton_eval(x_quad2, dd_quad, x_star, 2)
+    p2_check2 = newton_eval(x_quad2, dd_quad, x_check, 2)
+    r2_approx2 = abs(p3_star - p2_star2)
+
+    print(f"Value of P_2(x*) = {p2_star2}")
+    print(f"Check: P_2({x_check}) = {p2_check2} (expected: {y_check})")
+    print(f"Approximate error |R_2(x*)| ≈ {r2_approx2}\n")
+
     print(f"Value of P_3(x*) = {p3_star}")
     print(f"Check: P_3({x_check}) = {p3_check} (expected: {y_check})")
     print(f"Approximate error |R_3(x*)| ≈ {r3_approx}")
+    draw(x_quad2, y_quad2, dd_quad, x_cub, y_cub, dd_cub, x_star, p2_star2, p3_star, r2_approx2, r3_approx)
 
-    draw(x_quad, y_quad, dd_quad, x_cub, y_cub, dd_cub, x_star, p2_star, p3_star, r2_approx, r3_approx)
+
 
 
 if __name__ == "__main__":

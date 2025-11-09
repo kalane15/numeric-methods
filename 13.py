@@ -250,6 +250,7 @@ def print_values(derivative_schemes, top_header, x_values, order, h):
 
 
 def draw_errors(derivative_schemes, top_header, x_values, order, h):
+    x_values = x_values[5:]
     names = [i[1] for i in derivative_schemes]
     num_values = {name: [] for name in names}
     for func, name, error in derivative_schemes:

@@ -109,6 +109,8 @@ def calculate_mistake(method, a, b, h):
         return mx * h ** 4 / 720
     else:
         raise Exception("Неизвестный метод")
+
+
 a, b = 0, 1
 h = 0.1
 

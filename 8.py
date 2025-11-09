@@ -6,7 +6,6 @@ from math import e
 
 
 def draw():
-    return
     x1_range = np.linspace(-3, 3, 400)
     x2_range = np.linspace(-3, 3, 400)
     X1, X2 = np.meshgrid(x1_range, x2_range)

@@ -82,6 +82,8 @@ def dichotomy(a, b) -> tuple[int, int]:
 def simple_iteration(a, b, l):
     it = 0
     ok, x = check_conditions(f, a, b, l)
+    if not ok:
+        raise Exception("Не выполнены условия")
     while True:
         it += 1
         x_new = phi(x, l)
@@ -94,9 +96,13 @@ def newton(a, b, x0):
     if f(a) * f(b) >= 0:
         return None, 0
     x_n = np.linspace(a, b, 100)
+
     for xi in x_n:
-        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2 or df(xi) == 0:
-            print("sad")
+        if df(xi) == 0:
+            raise Exception("Не выполнены условия для метода")
+
+    for xi in x_n:
+        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2:
             return None, 0
 
     it = 0
@@ -175,16 +181,9 @@ def hord(a, b, x0):
     if x0 == a:
         z = a
         x = b
-    elif x0 == b:
+    else:
         z = b
         x = a
-    else:
-        if abs(f(a)) <= abs(f(b)):
-            z = x0
-            x = a
-        else:
-            z = x0
-            x = b
 
     it = 0
     while True:
@@ -216,35 +215,26 @@ def check_conditions(f, a, b, l):
     if f(a) * f(b) >= 0:
         raise Exception(f"Условие f(a)*f(b)<0 не выполнено на [{a}, {b}]!")
 
+    x = np.linspace(a, b, 1000)
+    for i in x:
+        if df(i) == 0:
+            raise Exception("Первая производная обращается в ноль")
+
     # 2) |φ'(x)| ≤ q < 1
     d_phi_a = abs(dphi(a, l))
     d_phi_b = abs(dphi(b, l))
     q = max(d_phi_a, d_phi_b)
-    if (int(q) == 1):
-        print("Сходимость не гарантирована (q = 1)!")
-        if d_phi_a < 1:
-            x0 = a
-        elif d_phi_b < 1:
-            x0 = b
-        else:
-            raise Exception("Условия не выполнены")
-        return True, x0
-    elif q > 1:
+    if q >= 1:
         raise Exception(f"|φ'(x)| ≤ q < 1 не выполнено (q = {q:.3f})!")
-
-    if d_phi_a < 1:
-        x0 = a
-    elif d_phi_b < 1:
-        x0 = b
 
     print(f"Условия f(a)*f(b)<0, |φ'(x)|={q:.3f}<1 выполнены.")
     return True, x0
 
 
 def main():
-    a_neg, b_neg = -3.79, -3.5
-    a_pos, b_pos = 1.1, 1.3
-    c, d = -1.1, -0.5
+    a_neg, b_neg = -3.79, -3.7
+    a_pos, b_pos = 1.2, 1.3
+    c, d = -1.0, -0.7
     draw()
     print("Деление пополам:")
     calc(dichotomy, a_neg, b_neg)
@@ -276,4 +266,5 @@ def main():
 
 
 if __name__ == "__main__":
+    draw2()
     main()
