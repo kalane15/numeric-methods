@@ -54,7 +54,7 @@ def newton_eval(x_vals, dd, x, degree):
 
 def get_newton_error(x, x_star, degree):
     err = 1
-    for i in range(degree):
+    for i in range(degree + 1):
         err *= abs(x_star - x[i])
     return err
 

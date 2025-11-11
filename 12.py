@@ -9,7 +9,7 @@ def draw(x_data, y_data, x_star, results, m_values):
 
     x_range = linspace(min(x_data), max(x_data), 100)
 
-    colors = {1: 'blue', 2: 'green', 3: 'orange'}
+    colors = {1: 'black', 2: 'purple', 3: 'yellow'}
 
     for m in m_values:
         coeffs = results[m]['coeffs']
@@ -18,10 +18,10 @@ def draw(x_data, y_data, x_star, results, m_values):
         plt.plot(x_range, Fm_x_range, color=colors[m], linestyle='-', 
                  label=f'$F_{m}(x)$ (degree {m})')
         
-        plt.scatter(x_star, results[m]['Fm_x_star'], color=colors[m], marker='*', s=150)
+        plt.scatter(x_star, results[m]['Fm_x_star'], color=colors[m], marker='H', s=150)
 
     plt.scatter([], [], color='purple', 
-                 label=f'$x^*$ = {x_star}', marker='x', s=100)
+                 label=f'$x^*$ = {x_star}', marker='H', s=100)
 
     plt.title('Approximation using Least Squares Method')
     plt.xlabel('$x$')

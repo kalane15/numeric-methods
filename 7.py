@@ -227,6 +227,13 @@ def check_conditions(f, a, b, l):
     if q >= 1:
         raise Exception(f"|φ'(x)| ≤ q < 1 не выполнено (q = {q:.3f})!")
 
+    if d_phi_a < 1:
+        x0 = a
+    elif d_phi_b < 1:
+        x0 = b
+    else:
+        raise Exception("Услвоия не выполненя")
+
     print(f"Условия f(a)*f(b)<0, |φ'(x)|={q:.3f}<1 выполнены.")
     return True, x0
 
@@ -266,5 +273,4 @@ def main():
 
 
 if __name__ == "__main__":
-    draw2()
     main()
