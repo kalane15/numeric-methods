@@ -33,24 +33,6 @@ def solve_tdma(a, b, c, d):
     return x
 
 
-def draw(plot_x_list, plot_y_list, x, y, x_star, y_star, target_i):
-    plt.figure(figsize=(12, 7))
-    plt.plot(plot_x_list, plot_y_list, label="Natural Cubic Spline S(x)", color="blue")
-    plt.scatter(x, y, color="red", zorder=5, label="Interpolation Nodes (x_i, y_i)")
-    if target_i != -1:
-        plt.scatter([x_star], [y_star], color="green", zorder=6, s=100,
-                    edgecolors="black", label=f"Point x* = {x_star}, S(x*) = {y_star:.4f}")
-
-    plt.title("Natural Cubic Spline")
-    plt.xlabel("x")
-    plt.ylabel("y = S(x)")
-    plt.legend()
-    plt.grid(True)
-    plt.axhline(0, color='black', linewidth=0.5)
-    plt.axvline(0, color='black', linewidth=0.5)
-    plt.show()
-
-
 def main():
     x = [0.25, 0.488, 0.760, 1.168, 1.576, 1.882, 2.120, 2.494, 2.902, 3.344, 3.65]
     y = [0.853, 1.047, 0.498, 0.354, 0.216, 0.052, 0.314, 0.792, 0.921, 1.157, 0.824]
@@ -175,10 +157,16 @@ def main():
         print(f"  c_{target_i} = {C[target_i]:.7f}")
         print(f"  d_{target_i} = {D[target_i]:.7f}")
 
-    plot_x_list = []
-    plot_y_list = []
+    colors = [
+        'red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'brown',
+        'cyan', 'magenta', 'lime', 'teal', 'indigo', 'violet', 'gold', 'silver',
+        'beige', 'coral', 'navy', 'maroon'
+    ]
 
-    for i in range(1, n + 1):
+    x_der = []
+    y_der = []
+
+    for i in range(1, len(x)):
         x_start = x[i - 1]
         x_end = x[i]
 
@@ -194,13 +182,40 @@ def main():
         if i > 1:
             local_x = local_x[1:]
 
+        local_x_vals = []
+        local_y_vals = []
         for val in local_x:
             dx = val - x[i - 1]
             s_val = (A[i] + B[i] * dx + C[i] * (dx ** 2) + D[i] * (dx ** 3))
-            plot_x_list.append(val)
-            plot_y_list.append(s_val)
+            dval = (B[i] + 2 * C[i] * dx + 3 * D[i] * (dx ** 2))
+            local_x_vals.append(val)
+            local_y_vals.append(s_val)
+            x_der.append(val)
+            y_der.append(dval)
 
-    draw(plot_x_list, plot_y_list, x, y, x_star, y_star, target_i)
+        plt.plot(local_x_vals, local_y_vals, color=colors[i - 1])
+
+    plt.scatter(x, y, color="red", zorder=5, label="Interpolation Nodes (x_i, y_i)")
+
+    plt.scatter([x_star], [y_star], color="green", zorder=6, s=100, edgecolors="black",
+                label=f"Point x* = {x_star}, S(x*) = {y_star:.4f}")
+
+    plt.title("Natural Cubic Spline")
+    plt.xlabel("x")
+    plt.ylabel("y = S(x)")
+    plt.legend()
+    plt.grid(True)
+    plt.axhline(0, color='black', linewidth=0.5)
+    plt.axvline(0, color='black', linewidth=0.5)
+    plt.show()
+
+    plt.figure()
+    plt.plot(x_der, y_der, color="red")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.grid(True)
+    plt.title("Spline Derivative")
+    plt.show()
 
 
 if __name__ == "__main__":
