@@ -104,8 +104,8 @@ def two_point_1(x, h):
     return (f(x) - f(x - h)) / h
 
 
-def two_point_1_error(x, h):
-    return h / 2 * abs(d2f(x, h))
+def two_point_1_error(h):
+    return f"{h / 2} * f''"
 
 
 def two_point_2(x, h):
@@ -120,8 +120,8 @@ def two_point_3(x, h):
     return (f(x + h) - f(x - h)) / (2 * h)
 
 
-def two_point_3_error(x, h):
-    return h * h / 6 * abs(d2f(x, h))
+def two_point_3_error(h):
+    return f"{h * h / 6} * f''"
 
 
 def three_point_4(x, h):
@@ -130,8 +130,8 @@ def three_point_4(x, h):
     return (-3 * f(x) + 4 * f(x + h) - f(x + 2 * h)) / (2 * h)
 
 
-def three_point_4_error(x, h):
-    return h * h / 3 * abs(d3f(x, h))
+def three_point_4_error(h):
+    return f"{h * h / 3} * f³"
 
 
 def four_point_9(x, h):
@@ -140,8 +140,8 @@ def four_point_9(x, h):
     return (-2 * f(x - h) - 3 * f(x) + 6 * f(x + h) - f(x + 2 * h)) / (6 * h)
 
 
-def four_point_9_error(x, h):
-    return h ** 3 / 12 * abs(d3f(x, h))
+def four_point_9_error(h):
+    return f"{h ** 3 / 12} * f³"
 
 
 def five_point_19(x, h):
@@ -150,8 +150,8 @@ def five_point_19(x, h):
     return (-25 * f(x) + 48 * f(x + h) - 36 * f(x + 2 * h) + 16 * f(x + 3 * h) - 3 * f(x + 4 * h)) / (12 * h)
 
 
-def five_point_19_error(x, h):
-    return h ** 4 / 5 * abs(d5f(x, h))
+def five_point_19_error(h):
+    return f"{h ** 4 / 5} * f⁵"
 
 
 def three_point_d2f_7(x, h):
@@ -160,8 +160,8 @@ def three_point_d2f_7(x, h):
     return (f(x - 2 * h) - 2 * f(x - h) + f(x)) / (h * h)
 
 
-def three_point_d2f_7_error(x, h):
-    return h * abs(d3f(x, h))
+def three_point_d2f_7_error(h):
+    return f"{h} * f³"
 
 
 def three_point_d2f_8(x, h):
@@ -170,8 +170,8 @@ def three_point_d2f_8(x, h):
     return (f(x + h) - 2 * f(x) + f(x - h)) / (h * h)
 
 
-def three_point_d2f_8_error(x, h):
-    return h * h / 12 * abs(d4f(x, h))
+def three_point_d2f_8_error(h):
+    return f"{h * h / 12} * f⁴"
 
 
 def four_point_d2f_16(x, h):
@@ -180,8 +180,8 @@ def four_point_d2f_16(x, h):
     return (2 * f(x) - 5 * f(x + h) + 4 * f(x + 2 * h) - f(x + 3 * h)) / (h * h)
 
 
-def four_point_d2f_16_error(x, h):
-    return 11 / 12 * h * h * abs(d4f(x, h))
+def four_point_d2f_16_error(h):
+    return f"{11 / 12 * h * h} * f⁴"
 
 
 def five_point_d2f_23(x, h):
@@ -190,8 +190,8 @@ def five_point_d2f_23(x, h):
     return (-f(x + 2 * h) + 16 * f(x + h) - 30 * f(x) + 16 * f(x - h) - f(x - 2 * h)) / (12 * h * h)
 
 
-def five_point_d2f_23_error(x, h):
-    return h ** 4 / 90 * abs(d6f(x, h))
+def five_point_d2f_23_error(h):
+    return f"{h ** 4 / 90} * f⁶"
 
 
 def derivative(f_scheme, x, h):
@@ -221,8 +221,13 @@ def print_values(derivative_schemes, top_header, x_values, order, h):
                 res_str += "{:<{width}}".format("-", width=col_width)
 
         print(res_str)
-
     print('\n')
+    print("Погрешность:")
+    res_str = "{:<{width}}".format("", width=col_width / 2)
+    for __, _, error in derivative_schemes:
+        res_str += "{:<{width}}".format(error(h), width=col_width)
+
+    print(res_str + "\n")
 
     for name in names:
         x = [i[0] for i in num_values[name]]
@@ -246,7 +251,7 @@ def print_values(derivative_schemes, top_header, x_values, order, h):
     plt.grid(True)
     plt.legend()
     plt.show()
-    draw_errors(derivative_schemes, top_header, x_values, order, h)
+    # draw_errors(derivative_schemes, top_header, x_values, order, h)
 
 
 def draw_errors(derivative_schemes, top_header, x_values, order, h):
