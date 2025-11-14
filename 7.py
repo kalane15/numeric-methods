@@ -92,21 +92,28 @@ def simple_iteration(a, b, l):
         x = x_new
 
 
-def newton(a, b, x0):
+def newton(a, b):
     if f(a) * f(b) >= 0:
-        return None, 0
-    x_n = np.linspace(a, b, 100)
+        raise Exception("Не выполнены условия для метода")
 
-    for xi in x_n:
-        if df(xi) == 0:
-            raise Exception("Не выполнены условия для метода")
+    if df(a) == 0 or df(b) == 0:
+        raise Exception("Не выполнены условия для метода")
 
-    for xi in x_n:
-        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2:
-            return None, 0
+    if (f(a) * d2f(a) < df(a) ** 2) and \
+            (f(b) * d2f(a) < df(b) ** 2):
+        if abs(f(a)) < abs(f(b)):
+            x = a
+        else:
+            x = b
+
+    if f(a) * d2f(a) < df(a) ** 2:
+        x = a
+    elif f(b) * d2f(b) < df(b) ** 2:
+        x = b
+    else:
+        raise Exception("Не выполнены условия для метода")
 
     it = 0
-    x = x0
     while True:
         x_new = x - f(x) / df(x)
         it += 1
@@ -115,16 +122,29 @@ def newton(a, b, x0):
         x = x_new
 
 
-def secant(a, b, x0):
+def secant(a, b):
     if f(a) * f(b) >= 0:
-        return None, 0
-    x_n = np.linspace(a, b, 100)
-    for xi in x_n:
-        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2 or df(xi) == 0:
-            return None, 0
+        raise Exception("Не выполнены условия для метода")
+
+    if df(a) == 0 or df(b) == 0:
+        raise Exception("Не выполнены условия для метода")
+
+    if (f(a) * d2f(a) < df(a) ** 2) and \
+            (f(b) * d2f(a) < df(b) ** 2):
+        if abs(f(a)) < abs(f(b)):
+            x = a
+        else:
+            x = b
+
+    if f(a) * d2f(a) < df(a) ** 2:
+        x = a
+    elif f(b) * d2f(b) < df(b) ** 2:
+        x = b
+    else:
+        raise Exception("Не выполнены условия для метода")
 
     it = 0
-    x_prev = x0
+    x_prev = x
 
     x = x_prev - f(x_prev) / df(x_prev)
 
@@ -136,54 +156,30 @@ def secant(a, b, x0):
     return x, it
 
 
-def find_root_intervals(x_start, x_end, dx=0.5) -> list:
-    intervals = []
-    x_values = np.arange(x_start, x_end + dx, dx)
-
-    for i in range(len(x_values) - 1):
-        a = x_values[i]
-        b = x_values[i + 1]
-        fa = f(a)
-        fb = f(b)
-
-        if fa * fb < 0:  # проверка изменения знака
-            fpp_a = d2f(a)
-            fpp_b = d2f(b)
-
-            cond_a = abs(fa * fpp_a) < (d2f(a)) ** 2
-            cond_b = abs(fb * fpp_b) < (d2f(b)) ** 2
-            if not (cond_a or cond_b):
-                print("Достаточное условие сходимости не выполнено, сходимость не гарантируется!")
-
-            if fa * fpp_a > 0 and fb * fpp_b > 0:
-                if abs(fa) <= abs(fb):
-                    x0 = a
-                else:
-                    x0 = b
-            elif fa * fpp_a > 0:
-                x0 = a
-            elif fb * fpp_b > 0:
-                x0 = b
-
-            intervals.append({'a': a, 'b': b, 'x0': x0})
-
-    return intervals
-
-
-def hord(a, b, x0):
+def hord(a, b):
     if f(a) * f(b) >= 0:
-        return None, 0
-    x_n = np.linspace(a, b, 100)
-    for xi in x_n:
-        if abs(f(xi) * d2f(xi)) >= df(xi) ** 2:
-            return None, 0
+        raise Exception("Не выполнены условия для метода")
 
-    if x0 == a:
-        z = a
-        x = b
-    else:
-        z = b
+    if df(a) == 0 or df(b) == 0:
+        raise Exception("Не выполнены условия для метода")
+
+    if (f(a) * d2f(a) < df(a) ** 2) and \
+            (f(b) * d2f(a) < df(b) ** 2):
+        if abs(f(a)) < abs(f(b)):
+            x = a
+            z = b
+        else:
+            x = b
+            z = a
+
+    if f(a) * d2f(a) < df(a) ** 2:
         x = a
+        z = b
+    elif f(b) * d2f(b) < df(b) ** 2:
+        x = b
+        z = a
+    else:
+        raise Exception("Не выполнены условия для метода")
 
     it = 0
     while True:
@@ -200,7 +196,7 @@ def calc(metod, a, b, x0=0.0, l=0.0):
     elif metod == dichotomy:
         root, iter = metod(a, b)
     else:
-        root, iter = metod(a, b, x0)
+        root, iter = metod(a, b)
 
     if root is None:
         print("Условия не выполнены")
@@ -215,10 +211,8 @@ def check_conditions(f, a, b, l):
     if f(a) * f(b) >= 0:
         raise Exception(f"Условие f(a)*f(b)<0 не выполнено на [{a}, {b}]!")
 
-    x = np.linspace(a, b, 1000)
-    for i in x:
-        if df(i) == 0:
-            raise Exception("Первая производная обращается в ноль")
+    if df(a) == 0 or df(b) == 0:
+        raise Exception(f"Условия не выполнены")
 
     # 2) |φ'(x)| ≤ q < 1
     d_phi_a = abs(dphi(a, l))
@@ -232,7 +226,7 @@ def check_conditions(f, a, b, l):
     elif d_phi_b < 1:
         x0 = b
     else:
-        raise Exception("Услвоия не выполненя")
+        raise Exception("Условия не выполненя")
 
     print(f"Условия f(a)*f(b)<0, |φ'(x)|={q:.3f}<1 выполнены.")
     return True, x0
@@ -253,7 +247,9 @@ def main():
     calc(simple_iteration, a_pos, b_pos, l=0.1)
     calc(simple_iteration, c, d, l=-0.1)
 
-    ints = find_root_intervals(-6.0, 4.0)
+    ints = [{'a': a_neg, 'b': b_neg},
+            {'a': a_pos, 'b': b_pos},
+            {'a': c, 'b': d}]
 
     if len(ints) == 0:
         raise Exception("нет подходящих интервалов")
@@ -261,15 +257,15 @@ def main():
     print("Метод Ньютона:")
 
     for interval in ints:
-        calc(newton, interval['a'], interval['b'], interval['x0'])
+        calc(newton, interval['a'], interval['b'])
 
     print("Метод секущих:")
     for interval in ints:
-        calc(secant, interval['a'], interval['b'], interval['x0'])
+        calc(secant, interval['a'], interval['b'])
 
     print("Метод хорд:")
     for interval in ints:
-        calc(hord, interval['a'], interval['b'], interval['x0'])
+        calc(hord, interval['a'], interval['b'])
 
 
 if __name__ == "__main__":

@@ -67,7 +67,7 @@ def trapezoidal_rule(a, b, h):
 def simpson_rule(a, b, h):
     n = int((b - a) / h)
     if n % 2 != 0:
-        raise Exception("Неккоректный шаг")
+        raise Exception("Некорректный шаг")
 
     total = f(a) + f(b)
     for i in range(1, n):

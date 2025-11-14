@@ -99,6 +99,9 @@ def check_convergence(x1, x2):
 
 
 def simple_iteration(x1, x2, eps=1e-4):
+    if not check_convergence(x1, x2):
+        raise Exception("Метод неприменим")
+
     it = 0
     while True:
         it += 1
@@ -112,6 +115,9 @@ def simple_iteration(x1, x2, eps=1e-4):
 
 
 def seidel_method(x1, x2, eps=1e-4):
+    if not check_convergence(x1, x2):
+        raise Exception("Метод неприменим")
+
     it = 0
     while True:
         it += 1
@@ -137,8 +143,8 @@ def newton_method(x1, x2, eps=1e-4):
              [df2_dx1(x1, x2), df2_dx2(x1, x2)]]
 
         det = J[0][0] * J[1][1] - J[0][1] * J[1][0]
-        if abs(det) < 1e-10:
-            return None, None, it
+        if abs(det) == 0:
+            raise Exception("Мытрица Якоби вырождена!")
 
         dx = (ff1 * J[1][1] - ff2 * J[0][1]) / det
         dy = (J[0][0] * ff2 - J[1][0] * ff1) / det
@@ -177,7 +183,7 @@ def main():
 
         # Newton's method
         x1, x2, it_n = newton_method(init['x1'], init['x2'])
-        print("Метод Ньютона: x1={:.6f}, x2={:.6f}, iterations={}".format(x1, x2, it_n))
+        print("Метод Ньютона: x1={:.6f}, x2={:.6f}, итераций={}".format(x1, x2, it_n))
         print(f"f1={round(f1(x1, x2), 2)}, f2={round(f2(x1, x2), 2)}\n")
 
     return True
