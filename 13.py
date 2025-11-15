@@ -181,7 +181,7 @@ def four_point_d2f_16(x, h):
 
 
 def four_point_d2f_16_error(h):
-    return f"{11 / 12 * h * h} * f⁴"
+    return f"{11 / 12 * h * h:.5f} * f⁴"
 
 
 def five_point_d2f_23(x, h):
@@ -191,7 +191,7 @@ def five_point_d2f_23(x, h):
 
 
 def five_point_d2f_23_error(h):
-    return f"{h ** 4 / 90} * f⁶"
+    return f"{h ** 4 / 90:.8f} * f⁶"
 
 
 def derivative(f_scheme, x, h):
@@ -275,6 +275,7 @@ def draw_errors(derivative_schemes, top_header, x_values, order, h):
     plt.grid(True)
     plt.legend()
     plt.show()
+
 
 def main():
     h = 0.15

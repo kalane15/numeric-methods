@@ -131,6 +131,13 @@ def seidel_method(x1, x2, eps=1e-4):
 
 
 def newton_method(x1, x2, eps=1e-4):
+    J = [[df1_dx1(x1, x2), df1_dx2(x1, x2)],
+         [df2_dx1(x1, x2), df2_dx2(x1, x2)]]
+
+    det = J[0][0] * J[1][1] - J[0][1] * J[1][0]
+    if abs(det) == 0:
+        raise Exception("Мытрица Якоби вырождена!")
+
     it = 0
     x1_pred = x1
     x2_pred = x2
@@ -138,13 +145,6 @@ def newton_method(x1, x2, eps=1e-4):
         it += 1
         ff1 = f1(x1, x2)
         ff2 = f2(x1, x2)
-
-        J = [[df1_dx1(x1, x2), df1_dx2(x1, x2)],
-             [df2_dx1(x1, x2), df2_dx2(x1, x2)]]
-
-        det = J[0][0] * J[1][1] - J[0][1] * J[1][0]
-        if abs(det) == 0:
-            raise Exception("Мытрица Якоби вырождена!")
 
         dx = (ff1 * J[1][1] - ff2 * J[0][1]) / det
         dy = (J[0][0] * ff2 - J[1][0] * ff1) / det
