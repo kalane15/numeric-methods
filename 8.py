@@ -98,6 +98,9 @@ def check_convergence(x1, x2):
     return q < 1
 
 
+MAX_ITERS = 1000
+
+
 def simple_iteration(x1, x2, eps=1e-4):
     if not check_convergence(x1, x2):
         raise Exception("Метод неприменим")
@@ -112,6 +115,9 @@ def simple_iteration(x1, x2, eps=1e-4):
             return x1_new, x2_new, it
         x1 = x1_new
         x2 = x2_new
+
+        if it > MAX_ITERS:
+            raise Exception(f"Метод не сошелся за {it} итераций")
 
 
 def seidel_method(x1, x2, eps=1e-4):
@@ -129,6 +135,9 @@ def seidel_method(x1, x2, eps=1e-4):
         x1 = x1_new
         x2 = x2_new
 
+        if it > MAX_ITERS:
+            raise Exception(f"Метод не сошелся за {it} итераций")
+
 
 def newton_method(x1, x2, eps=1e-4):
     J = [[df1_dx1(x1, x2), df1_dx2(x1, x2)],
@@ -136,7 +145,7 @@ def newton_method(x1, x2, eps=1e-4):
 
     det = J[0][0] * J[1][1] - J[0][1] * J[1][0]
     if abs(det) == 0:
-        raise Exception("Мытрица Якоби вырождена!")
+        raise Exception("Матрица Якоби вырождена!")
 
     it = 0
     x1_pred = x1
@@ -154,6 +163,9 @@ def newton_method(x1, x2, eps=1e-4):
             return x1, x2, it
         x1_pred = x1
         x2_pred = x2
+
+        if it > MAX_ITERS:
+            raise Exception(f"Метод не сошелся за {it} итераций")
 
 
 def main():

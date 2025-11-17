@@ -65,7 +65,7 @@ def draw2() -> None:
 
 def dichotomy(a, b) -> tuple[int, int]:
     if f(a) * f(b) >= 0:
-        return None, 0
+        raise Exception("Не выполнены условия для метода")
 
     it = 0
     while b - a > EPSILON:
@@ -79,17 +79,28 @@ def dichotomy(a, b) -> tuple[int, int]:
     return (a + b) / 2, it
 
 
-def simple_iteration(a, b, l):
+def simple_iteration(a, b):
     it = 0
-    ok, x = check_conditions(f, a, b, l)
-    if not ok:
-        raise Exception("Не выполнены условия")
+    l = 0
+    ok = False
+    for i_l in range(-1000, 1000):
+        l = i_l * 0.001
+        ok, x = check_conditions(f, a, b, l)
+        if ok:
+            break
+    else:
+        raise Exception("Условия не выполнены")
+
     while True:
         it += 1
         x_new = phi(x, l)
         if abs(x - x_new) < EPSILON:
             return x_new, it
         x = x_new
+
+        if it > 1000:
+            raise Exception("Метод не сошелся за 10000 итераций, начальное приближение слишком неточное")
+        e
 
 
 def newton(a, b):
@@ -105,8 +116,7 @@ def newton(a, b):
             x = a
         else:
             x = b
-
-    if f(a) * d2f(a) < df(a) ** 2:
+    elif f(a) * d2f(a) < df(a) ** 2:
         x = a
     elif f(b) * d2f(b) < df(b) ** 2:
         x = b
@@ -190,9 +200,9 @@ def hord(a, b):
         x = x_new
 
 
-def calc(metod, a, b, x0=0.0, l=0.0):
+def calc(metod, a, b):
     if metod == simple_iteration:
-        root, iter = metod(a, b, l)
+        root, iter = metod(a, b)
     elif metod == dichotomy:
         root, iter = metod(a, b)
     else:
@@ -217,45 +227,35 @@ def check_conditions(f, a, b, l):
     # 2) |φ'(x)| ≤ q < 1
     d_phi_a = abs(dphi(a, l))
     d_phi_b = abs(dphi(b, l))
-    q = max(d_phi_a, d_phi_b)
-    if q >= 1:
-        raise Exception(f"|φ'(x)| ≤ q < 1 не выполнено (q = {q:.3f})!")
 
-    if d_phi_a < 1:
-        x0 = a
-    elif d_phi_b < 1:
-        x0 = b
+    if d_phi_a < 1 and d_phi_b < 1:
+        x0 = min(a, b, key=lambda x: abs(x))
     else:
-        raise Exception("Условия не выполненя")
+        return False, 0
 
-    print(f"Условия f(a)*f(b)<0, |φ'(x)|={q:.3f}<1 выполнены.")
     return True, x0
 
 
 def main():
-    a_neg, b_neg = -3.79, -3.7
+    a_neg, b_neg = -3.79, -3.5
     a_pos, b_pos = 1.2, 1.3
     c, d = -1.0, -0.7
+
     draw()
     print("Деление пополам:")
-    calc(dichotomy, a_neg, b_neg)
-    calc(dichotomy, a_pos, b_pos)
-    calc(dichotomy, c, d)
-
-    print("Простая итерация:")
-    calc(simple_iteration, a_neg, b_neg, l=0.1)
-    calc(simple_iteration, a_pos, b_pos, l=0.1)
-    calc(simple_iteration, c, d, l=-0.1)
 
     ints = [{'a': a_neg, 'b': b_neg},
             {'a': a_pos, 'b': b_pos},
             {'a': c, 'b': d}]
+    for i in ints:
+        calc(dichotomy, i['a'], i['b'])
 
-    if len(ints) == 0:
-        raise Exception("нет подходящих интервалов")
+    print("Простая итерация:")
+    calc(simple_iteration, a_neg, b_neg)
+    calc(simple_iteration, a_pos, b_pos)
+    calc(simple_iteration, c, d)
 
     print("Метод Ньютона:")
-
     for interval in ints:
         calc(newton, interval['a'], interval['b'])
 

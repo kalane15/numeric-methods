@@ -130,7 +130,7 @@ def main():
         if h[i] > H:
             H = h[i]
     H_power_4 = H ** 4
-    max_error_factor = (5.0 / 384.0) * H_power_4
+    max_error_factor = H_power_4
 
     if target_i != -1:
         # Calculate S(x*)
@@ -166,6 +166,9 @@ def main():
     x_der = []
     y_der = []
 
+    x_der2 = []
+    y_der2 = []
+
     for i in range(1, len(x)):
         x_start = x[i - 1]
         x_end = x[i]
@@ -193,6 +196,10 @@ def main():
             x_der.append(val)
             y_der.append(dval)
 
+            dval2 = (2 * C[i] + 6 * D[i] * dx)
+            x_der2.append(val)
+            y_der2.append(dval2)
+
         plt.plot(local_x_vals, local_y_vals, color=colors[i - 1])
 
     plt.scatter(x, y, color="red", zorder=5, label="Interpolation Nodes (x_i, y_i)")
@@ -210,10 +217,12 @@ def main():
     plt.show()
 
     plt.figure()
-    plt.plot(x_der, y_der, color="red")
+    plt.plot(x_der, y_der, color="red", label="f'")
+    plt.plot(x_der2, y_der2, color="blue", label = "f''")
     plt.xlabel("x")
     plt.ylabel("y")
     plt.grid(True)
+    plt.legend()
     plt.title("Spline Derivative")
     plt.show()
 

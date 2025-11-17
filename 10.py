@@ -107,12 +107,9 @@ def build_newton_of_degree(x_all, y_all, x_star, degree):
     print(f"Answer with min err is {best}")
 
 
-
 def main():
     x_all = x_table.copy()
     y_all = y_table.copy()
-
-
 
     x_star = 4.016
 

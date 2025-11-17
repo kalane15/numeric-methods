@@ -51,10 +51,7 @@ def lagrange(x_vals, y_vals, x):
     return result
 
 
-def omega(x, x_vals):
-    """
-    Polynomial ω_{n+1}(x) = ∏_{j=0}^n (x - x_j).
-    """
+def error(x, x_vals):
     prod = 1.0
     for xj in x_vals:
         prod *= (x - xj)
@@ -75,10 +72,10 @@ def build_lagrange(x_t, y_t, x_star, start, stop):
     for i in x:
         y.append(lagrange(x_quad, y_quad, i))
 
-    omega2 = abs(omega(x_star, x_quad))
-    print(f"Value of L_2(x*) = {p2_star}")
-    print(f"Check: L_2({x_check}) = {p2_check} (expected: {y_check})")
-    print(f"|ω_3(x*)| = {omega2}")
+    omega2 = abs(error(x_star, x_quad))
+    print(f"Value of L_{stop-start - 1}(x*) = {p2_star}")
+    print(f"Check: L_{stop-start}({x_check}) = {p2_check} (expected: {y_check})")
+    print(f"|ω(x*)| = {omega2}")
     print()
 
     return x, y, omega2, p2_star, x_quad, y_quad
