@@ -82,7 +82,7 @@ def dichotomy(a, b) -> tuple[int, int]:
 def simple_iteration(a, b, l):
     max_dphi = max(abs(dphi(xi, l)) for xi in [a, b])
     if f(a) * f(b) >= 0 and max_dphi >= 1:
-        return None, 0
+        raise Exception("Не выполнены условия для метода")
 
     it = 0
 
@@ -90,7 +90,7 @@ def simple_iteration(a, b, l):
     d_phi_a = abs(dphi(a, l))
     d_phi_b = abs(dphi(b, l))
     q = max(d_phi_a, d_phi_b)
-    if (int(q) == 1):
+    if int(q) == 1:
         print("Сходимость не гарантирована (q = 1)!")
         if d_phi_a < 1:
             x = a
@@ -112,7 +112,6 @@ def simple_iteration(a, b, l):
         if abs(x - x_new) < EPSILON:
             return x_new, it
         x = x_new
-
 
 
 def newton(a, b):
@@ -250,8 +249,9 @@ def check_conditions(f, a, b, l):
 
 def main():
     a_neg, b_neg = -3.79, -3.5
-    a_pos, b_pos = 1.2, 1.3
     c, d = -3.0, 0
+    a_pos, b_pos = 1.2, 1.3
+
 
     draw()
     print("Деление пополам:")
