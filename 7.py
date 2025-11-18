@@ -79,17 +79,32 @@ def dichotomy(a, b) -> tuple[int, int]:
     return (a + b) / 2, it
 
 
-def simple_iteration(a, b):
+def simple_iteration(a, b, l):
+    max_dphi = max(abs(dphi(xi, l)) for xi in [a, b])
+    if f(a) * f(b) >= 0 and max_dphi >= 1:
+        return None, 0
+
     it = 0
-    l = 0
-    ok = False
-    for i_l in range(-1000, 1000):
-        l = i_l * 0.001
-        ok, x = check_conditions(f, a, b, l)
-        if ok:
-            break
-    else:
-        raise Exception("Условия не выполнены")
+
+    x = 0
+    d_phi_a = abs(dphi(a, l))
+    d_phi_b = abs(dphi(b, l))
+    q = max(d_phi_a, d_phi_b)
+    if (int(q) == 1):
+        print("Сходимость не гарантирована (q = 1)!")
+        if d_phi_a < 1:
+            x = a
+        elif d_phi_b < 1:
+            x = b
+        else:
+            x = a
+    elif q > 1:
+        raise Exception(f"|φ'(x)| ≤ q < 1 не выполнено (q = {q:.3f})!")
+
+    if d_phi_a < 1:
+        x = a
+    elif d_phi_b < 1:
+        x = b
 
     while True:
         it += 1
@@ -98,9 +113,6 @@ def simple_iteration(a, b):
             return x_new, it
         x = x_new
 
-        if it > 1000:
-            raise Exception("Метод не сошелся за 10000 итераций, начальное приближение слишком неточное")
-        e
 
 
 def newton(a, b):
@@ -200,9 +212,9 @@ def hord(a, b):
         x = x_new
 
 
-def calc(metod, a, b):
+def calc(metod, a, b, l=0.0):
     if metod == simple_iteration:
-        root, iter = metod(a, b)
+        root, iter = metod(a, b, l)
     elif metod == dichotomy:
         root, iter = metod(a, b)
     else:
@@ -239,7 +251,7 @@ def check_conditions(f, a, b, l):
 def main():
     a_neg, b_neg = -3.79, -3.5
     a_pos, b_pos = 1.2, 1.3
-    c, d = -1.0, -0.7
+    c, d = -3.0, 0
 
     draw()
     print("Деление пополам:")
@@ -251,9 +263,9 @@ def main():
         calc(dichotomy, i['a'], i['b'])
 
     print("Простая итерация:")
-    calc(simple_iteration, a_neg, b_neg)
-    calc(simple_iteration, a_pos, b_pos)
-    calc(simple_iteration, c, d)
+    calc(simple_iteration, a_neg, b_neg, 0.1)
+    calc(simple_iteration, a_pos, b_pos, 0.1)
+    calc(simple_iteration, c, d, -0.1)
 
     print("Метод Ньютона:")
     for interval in ints:
