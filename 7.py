@@ -249,7 +249,7 @@ def check_conditions(f, a, b, l):
 
 def main():
     a_neg, b_neg = -3.79, -3.5
-    c, d = -3.0, 0
+    c, d = -1.2, -0.5
     a_pos, b_pos = 1.2, 1.3
 
 

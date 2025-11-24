@@ -52,48 +52,48 @@ def df2_dx2(x1, x2):
     return -8 * x2
 
 
+LAMBDA1 = 0
+LAMBDA2 = 0
+
+
 def phi1(x1, x2):
-    if x2 < 0:
-        return -np.sqrt(x1 ** 2 + 1) / 2
-    else:
-        return np.sqrt(x1 ** 2 + 1) / 2
-
-
-def dphi1_dx1(x1, x2):
-    if x2 < 0:
-        sign = -1
-    else:
-        sign = 1
-
-    return sign * (x1 / (2 * np.sqrt(x1 ** 2 + 1)))
-
-
-def dphi1_dx2(x1, x2):
-    return 0
+    return x1 + LAMBDA1 * f1(x1, x2)
 
 
 def phi2(x1, x2):
-    return np.log(4 - x1) / x1
+    return x2 + LAMBDA2 * f2(x1, x2)
 
 
-def dphi2_x1(x1, x2):
-    return (-x1 / (4 - x1) - np.log(4 - x1)) / x1 ** 2
+def dphi1_dx1(x1, x2):
+    return 1 + LAMBDA1 * df1_dx1(x1, x2)
 
 
-def dphi2_x2(x1, x2):
-    return 0
+def dphi1_dx2(x1, x2):
+    return LAMBDA1 * df1_dx2(x1, x2)
+
+
+def dphi2_dx1(x1, x2):
+    return LAMBDA2 * df2_dx1(x1, x2)
+
+
+def dphi2_dx2(x1, x2):
+    return 1 + LAMBDA2 * df2_dx2(x1, x2)
 
 
 def check_convergence(x1, x2):
     a, b, c, d = (dphi1_dx1(x1, x2),
                   dphi1_dx2(x1, x2),
-                  dphi2_x1(x1, x2),
-                  dphi2_x2(x1, x2))
-
+                  dphi2_dx1(x1, x2),
+                  dphi2_dx2(x1, x2))
+    # print(a, b, c, d)
     q1 = abs(a) + abs(b)
-    q2 = abs(b) + abs(d)
+    q2 = abs(c) + abs(d)
 
     q = max(q1, q2)
+
+    if int(q) == 1:
+        print("q == 1, сходимость не гарантирована")
+        return True
 
     return q < 1
 
@@ -170,19 +170,17 @@ def newton_method(x1, x2, eps=1e-4):
 
 def main():
     initials = [
-        {"x1": -1.7, "x2": -1, "label": "Первый корень"},
-        {"x1": 1.248, "x2": 0.83, "label": "Второй корень"}
+        {"x1": -1.75, "x2": -1, "label": "Первый корень", "l1" : 0.02, "l2" : -0.1},
+        {"x1": 1.248, "x2": 0.83, "label": "Второй корень", "l1" : -0.05, "l2" : 0.1}
     ]
+    global LAMBDA1, LAMBDA2
 
     # Run and print results
     for init in initials:
         print(f"\n--- {init['label']} ---")
         print("Приближение: x1={:.4f}, x2={:.4f}".format(init['x1'], init['x2']))
-
-        if not check_convergence(init['x1'], init['x2']):
-            print("Не выполнены условия сходимости")
-            return False
-
+        LAMBDA1 = init["l1"]
+        LAMBDA2 = init["l2"]
         # Simple Iteration
         x1, x2, it = simple_iteration(init['x1'], init['x2'])
         print(f"Простой итерации: x1={x1 :.6f}, x2={x2 :.6f}, итераций={it}")
@@ -202,5 +200,5 @@ def main():
 
 
 if __name__ == "__main__":
-    draw()
+    # draw()
     main()
