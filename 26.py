@@ -9,9 +9,9 @@ if hasattr(sys.stdout, "reconfigure"):
 
 
 def rhs(x: float, y: float, v: float) -> tuple[float, float]:
-    """Правая часть системы: y' = v, v' = f(x, y, v)."""
+    """Правая часть системы для x*y'' - 2(x*tan(x)+1)*y' + 2*y*tan(x) = 0"""
     dy = v
-    dv = (3 * x * x * v - (3 * x + 2) * y) / (x**4)
+    dv = (2 * (x * math.tan(x) + 1) * v - 2 * y * math.tan(x)) / x
     return dy, dv
 
 
@@ -115,7 +115,7 @@ def fmt(value: float, width: int = 12, precision: int = 6) -> str:
 
 def exact_solution(x: float) -> float:
     """Аналитическое решение из условия задачи."""
-    return x * math.exp(-2 / x) + x * math.exp(-1 / x)
+    return x * math.tan(x) + math.tan(x) - x + 1
 
 
 def plot_solutions(xs: list[float], ys: list[float], x_start: float, x_end: float) -> None:
@@ -137,14 +137,14 @@ def plot_solutions(xs: list[float], ys: list[float], x_start: float, x_end: floa
 
 
 def main() -> None:
-    x_start = 0.5
-    x_end = 5.0
-    y_start = 0.076
-    y_end = 7.445
-    h = 0.5
+    x_start = 2.0
+    x_end = 4.2
+    y_start = -7.555
+    y_end = 6.044
+    h = 0.11
 
-    alpha_guess_0 = 1.0
-    alpha_guess_1 = 1.6
+    alpha_guess_0 = 4.0
+    alpha_guess_1 = 8.0
 
     xs, ys, vs, alpha, history = shooting(
         x_start,
