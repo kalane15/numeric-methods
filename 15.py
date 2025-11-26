@@ -63,11 +63,11 @@ IMPLICIT_TABLEAUS: List[Tableau] = [
         "implicit": True,
     },
     {
-        "name": "Метод трапеций (Лобатто IIa)",
+        "name": "Метод Хаммера-Холлингсуорта",
         "order": 2,
-        "c": (0.0, 1.0),
-        "a": ((0.0, 0.0), (0.5, 0.5)),
-        "b": (0.5, 0.5),
+        "c": (0.0, 2.0/3.0),
+        "a": ((0.0, 0.0), (1.0/3.0, 1.0/3.0)),
+        "b": (0.25, 0.75),
         "implicit": True,
     },
     {
@@ -311,13 +311,13 @@ def plot_results(explicit_results: Sequence[dict], implicit_results: Sequence[di
         (explicit_results, implicit_results),
         ("Явные схемы", "Неявные схемы"),
     ):
-        ax.plot(smooth_x, smooth_y, color="black", label="Аналитика")
+        ax.plot(smooth_x, smooth_y, color="black", label="Аналитика", linestyle="--")
         for res in res_set:
             ax.plot(
                 res["xs"],
                 res["ys"],
                 marker="o",
-                linestyle="--",
+                linestyle=":",
                 label=res["tableau"]["name"],
             )
         ax.set_title(title)
