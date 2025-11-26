@@ -294,8 +294,10 @@ def print_summary(title: str, results: Sequence[dict]) -> None:
     for res in results:
         t = res["tableau"]
         print(
-            f"{t['name']:35s} {t['order']:3d} {res['max_error']:12.6f} "
-            f"{res['mean_error']:12.6f} {res['final_error']:12.6f}"
+            f"{t['name']:35s} {t['order']:3d} "
+            f"{res['max_error']:12.5e} "
+            f"{res['mean_error']:12.5e} "
+            f"{res['final_error']:12.5e}"
         )
 
 
