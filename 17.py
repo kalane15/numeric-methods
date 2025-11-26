@@ -7,19 +7,23 @@ import matplotlib.pyplot as plt
 sys.stdout.reconfigure(encoding="utf-8")
 
 
-A = 0.075  # левая граница
-B = 3.0    # правая граница
-H = 0.225  # шаг сети
-DERIV_LEFT = 2.263   # y'(a)
-DERIV_RIGHT = 40.587  # y'(b)
+A = 0.5  # левая граница
+B = 6.5    # правая граница
+H = 0.5  # шаг сети
+LEFT_BC = 0.515
+RIGHT_BC = 14.738
+
+
+def a(x: float):
+    return x*x*(3*x + 2)
 
 
 def p(x: float) -> float:
-    return 2.0 / x
+    return (-2.0 * x * (3 * x + 4)) / a(x)
 
 
 def q(x: float) -> float:
-    return -(1.0 + 3.0 / x + 3.0 / (4.0 * x * x))
+    return 6 * (x + 2) / a(x)
 
 
 def f(x: float) -> float:
@@ -27,27 +31,31 @@ def f(x: float) -> float:
 
 
 def analytic_solution(x: float) -> float:
-    return math.exp(x) * math.sqrt(x)
+    return (x*x*(1 + x)) / (3*x + 2)
 
 
 def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
-    n_intervals = round((B - A) / H)
-    size = n_intervals + 1  # число узлов
+    n_intervals = round((B - A) / H)  # количество интервалов
+    size = n_intervals + 1  # количество узлов
     matrix = [[0.0 for _ in range(size)] for _ in range(size)]
     rhs = [0.0 for _ in range(size)]
 
+    # Граничные условия для левой границы: y'(a) + y(a) = LEFT_BC
     if order == 1:
-        matrix[0][0] = -1.0
-        matrix[0][1] = 1.0
-        rhs[0] = DERIV_LEFT * H
+        # Односторонняя разность для y'(a)
+        matrix[0][0] = 1.0 - 1.0 / H  # для y(a)
+        matrix[0][1] = 1.0 / H        # для y'(a)
+        rhs[0] = LEFT_BC * H  # правая часть с учетом LEFT_BC
     elif order == 2:
-        matrix[0][0] = -3.0
-        matrix[0][1] = 4.0
-        matrix[0][2] = -1.0
-        rhs[0] = 2.0 * H * DERIV_LEFT
+        # Центральная разность для y'(a)
+        matrix[0][0] = 1.0 - 3.0 / (2 * H)  # для y(a)
+        matrix[0][1] = 4.0 / (2 * H)        # для y'(a)
+        matrix[0][2] = -1.0 / (2 * H)       # для y''(a)
+        rhs[0] = 2.0 * H * LEFT_BC  # правая часть с учетом LEFT_BC
     else:
         raise ValueError("Допустимые порядки аппроксимации: 1 или 2.")
 
+    # Основная часть для внутренних точек
     for k in range(1, size - 1):
         xk = A + k * H
         matrix[k][k - 1] = 1.0 / (H * H) - p(xk) / (2.0 * H)
@@ -55,17 +63,12 @@ def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
         matrix[k][k + 1] = 1.0 / (H * H) + p(xk) / (2.0 * H)
         rhs[k] = f(xk)
 
-    if order == 1:
-        matrix[-1][-2] = -1.0
-        matrix[-1][-1] = 1.0
-        rhs[-1] = DERIV_RIGHT * H
-    else:
-        matrix[-1][-3] = 1.0
-        matrix[-1][-2] = -4.0
-        matrix[-1][-1] = 3.0
-        rhs[-1] = 2.0 * H * DERIV_RIGHT
+    # Граничные условия для правой границы: y'(b) = RIGHT_BC
+    matrix[-1][-1] = 1.0  # коэффициент для y(b)
+    rhs[-1] = RIGHT_BC * H  # правая часть
 
     return matrix, rhs
+
 
 
 def gaussian_elimination(matrix: List[List[float]], rhs: List[float]) -> List[float]:
@@ -151,7 +154,7 @@ def main() -> None:
 
     print("Краевая задача: 4x^2 y'' + 8xy' - (4x^2 + 12x + 3)y = 0")
     print(f"Интервал: [{A}; {B}], шаг h = {H}")
-    print(f"Граничные условия: y'({A}) = {DERIV_LEFT}, y'({B}) = {DERIV_RIGHT}\n")
+    print(f"Граничные условия: y'({A}) = {LEFT_BC}, y'({B}) = {RIGHT_BC}\n")
 
     print_table(xs, exact_values, solution_order1, solution_order2)
 
