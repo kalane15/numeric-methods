@@ -30,24 +30,24 @@ EXPLICIT_TABLEAUS: List[Tableau] = [
         "implicit": False,
     },
     {
-        "name": "Эйлер-Коши (2 порядок)",
+        "name": "Метод Хойна (2 порядок)",
         "order": 2,
-        "c": (0.0, 1.0),
-        "a": ((0.0, 0.0), (1.0, 0.0)),
-        "b": (0.5, 0.5),
+        "c": (0.0, 0.5),
+        "a": ((0.0, 0.0), (0.5, 0.0)),
+        "b": (0.0, 1.0),
         "implicit": False,
     },
     {
-        "name": "Классический РК4",
+        "name": "Формула Гилла",
         "order": 4,
         "c": (0.0, 0.5, 0.5, 1.0),
         "a": (
             (0.0, 0.0, 0.0, 0.0),
             (0.5, 0.0, 0.0, 0.0),
-            (0.0, 0.5, 0.0, 0.0),
-            (0.0, 0.0, 1.0, 0.0),
+            ((math.sqrt(2) - 1.0) / 2.0, 1.0 - 1.0 / math.sqrt(2), 0.0, 0.0),
+            (0.0, -1.0/math.sqrt(2), 1.0 + 1.0 / math.sqrt(2), 0.0),
         ),
-        "b": (1.0 / 6.0, 1.0 / 3.0, 1.0 / 3.0, 1.0 / 6.0),
+        "b": (1.0 / 6.0, 1.0 / 3.0 - 1.0 / (3.0*math.sqrt(2.0)), 1.0 / 3.0 + 1.0 / (3.0*math.sqrt(2.0)), 1.0 / 6.0),
         "implicit": False,
     },
 ]
@@ -290,7 +290,7 @@ def print_summary(title: str, results: Sequence[dict]) -> None:
     print(f"\n{title}")
     header = f"{'Метод':35s} {'p':>3s} {'max|ош|':>12s} {'ср.ош':>12s} {'|ош| в x=5':>12s}"
     print(header)
-    print("-" * len(header))
+    print("*" * len(header))
     for res in results:
         t = res["tableau"]
         print(
