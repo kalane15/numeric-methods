@@ -40,18 +40,18 @@ def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
     matrix = [[0.0 for _ in range(size)] for _ in range(size)]
     rhs = [0.0 for _ in range(size)]
 
-    # Граничные условия для левой границы: y'(a) + y(a) = LEFT_BC
+    # Левая граница: y(a) + y'(a) = LEFT_BC
     if order == 1:
         # Односторонняя разность для y'(a)
         matrix[0][0] = 1.0 - 1.0 / H  # для y(a)
-        matrix[0][1] = 1.0 / H        # для y'(a)
-        rhs[0] = LEFT_BC * H  # правая часть с учетом LEFT_BC
+        matrix[0][1] = 1.0 / H        # для y_1 (разность для y')
+        rhs[0] = LEFT_BC
     elif order == 2:
-        # Центральная разность для y'(a)
-        matrix[0][0] = 1.0 - 3.0 / (2 * H)  # для y(a)
-        matrix[0][1] = 4.0 / (2 * H)        # для y'(a)
-        matrix[0][2] = -1.0 / (2 * H)       # для y''(a)
-        rhs[0] = 2.0 * H * LEFT_BC  # правая часть с учетом LEFT_BC
+        # Второй порядок аппроксимации для y'(a)
+        matrix[0][0] = 1.0 - 3.0 / (2 * H)
+        matrix[0][1] = 4.0 / (2 * H)
+        matrix[0][2] = -1.0 / (2 * H)
+        rhs[0] = LEFT_BC
     else:
         raise ValueError("Допустимые порядки аппроксимации: 1 или 2.")
 
@@ -63,9 +63,9 @@ def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
         matrix[k][k + 1] = 1.0 / (H * H) + p(xk) / (2.0 * H)
         rhs[k] = f(xk)
 
-    # Граничные условия для правой границы: y'(b) = RIGHT_BC
-    matrix[-1][-1] = 1.0  # коэффициент для y(b)
-    rhs[-1] = RIGHT_BC * H  # правая часть
+    # Правая граница: y(b) = RIGHT_BC
+    matrix[-1][-1] = 1.0  # только для y(b)
+    rhs[-1] = RIGHT_BC
 
     return matrix, rhs
 
