@@ -113,7 +113,6 @@ def max_norm(values: Iterable[float]) -> float:
 
 
 def solve_linear_system(matrix: Sequence[Sequence[float]], rhs: Sequence[float]) -> List[float]:
-    """Прямой Гаусс с частичным выбором главного элемента."""
     n = len(rhs)
     a = [list(row) for row in matrix]
     b = list(rhs)
@@ -169,7 +168,6 @@ def fixed_point_iteration(
     initial: Sequence[float],
     rhs: Callable[[float, float], float],
 ) -> List[float]:
-    """Простая итеративная поправка на случай проблем с Ньютоном."""
     s = len(tableau["c"])
     stages = list(initial)
     for _ in range(25):
@@ -302,7 +300,7 @@ def print_summary(title: str, results: Sequence[dict]) -> None:
 
 
 def plot_results(explicit_results: Sequence[dict], implicit_results: Sequence[dict]) -> None:
-    smooth_x = np.arange(1.0, 5.0 + 1e-9, 0.01)
+    smooth_x = np.arange(0.4, 3.0 + 1e-9, 0.01)
     smooth_y = [analytic_solution(val) for val in smooth_x]
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharey=True)

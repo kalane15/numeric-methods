@@ -6,16 +6,15 @@ import matplotlib.pyplot as plt
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-
 A = 0.5  # левая граница
-B = 6.5    # правая граница
+B = 6.5  # правая граница
 H = 0.5  # шаг сети
 LEFT_BC = 0.515
 RIGHT_BC = 14.738
 
 
 def a(x: float):
-    return x*x*(3*x + 2)
+    return x * x * (3 * x + 2)
 
 
 def p(x: float) -> float:
@@ -31,7 +30,7 @@ def f(x: float) -> float:
 
 
 def analytic_solution(x: float) -> float:
-    return (x*x*(1 + x)) / (3*x + 2)
+    return (x * x * (1 + x)) / (3 * x + 2)
 
 
 def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
@@ -44,7 +43,7 @@ def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
     if order == 1:
         # Односторонняя разность для y'(a)
         matrix[0][0] = 1.0 - 1.0 / H  # для y(a)
-        matrix[0][1] = 1.0 / H        # для y_1 (разность для y')
+        matrix[0][1] = 1.0 / H  # для y_1 (разность для y')
         rhs[0] = LEFT_BC
     elif order == 2:
         # Второй порядок аппроксимации для y'(a)
@@ -68,7 +67,6 @@ def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
     rhs[-1] = RIGHT_BC
 
     return matrix, rhs
-
 
 
 def gaussian_elimination(matrix: List[List[float]], rhs: List[float]) -> List[float]:
@@ -168,4 +166,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

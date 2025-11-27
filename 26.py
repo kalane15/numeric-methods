@@ -10,7 +10,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 def rhs(x: float, y: float, v: float) -> tuple[float, float]:
     dy = v
-    dv = (3 * x * x * v - (3 * x + 2) * y) / (x ** 4)
+    dv = (2.0 * (x * math.tan(x) + 1.0) * v - 2.0 * y * math.tan(x)) / x
     return dy, dv
 
 
