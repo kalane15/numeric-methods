@@ -9,14 +9,12 @@ if hasattr(sys.stdout, "reconfigure"):
 
 
 def rhs(x: float, y: float, v: float) -> tuple[float, float]:
-    """Правая часть системы для x*y'' - 2(x*tan(x)+1)*y' + 2*y*tan(x) = 0"""
     dy = v
-    dv = (2 * (x * math.tan(x) + 1) * v - 2 * y * math.tan(x)) / x
+    dv = (3 * x * x * v - (3 * x + 2) * y) / (x ** 4)
     return dy, dv
 
 
 def rk4_step(x: float, y: float, v: float, h: float) -> tuple[float, float]:
-    """Шаг метода Рунге–Кутты 4-го порядка для системы из двух уравнений."""
     k1_y, k1_v = rhs(x, y, v)
     k2_y, k2_v = rhs(x + h / 2, y + h * k1_y / 2, v + h * k1_v / 2)
     k3_y, k3_v = rhs(x + h / 2, y + h * k2_y / 2, v + h * k2_v / 2)
@@ -28,9 +26,8 @@ def rk4_step(x: float, y: float, v: float, h: float) -> tuple[float, float]:
 
 
 def integrate(
-    alpha: float, x0: float, y0: float, h: float, steps: int
+        alpha: float, x0: float, y0: float, h: float, steps: int
 ) -> tuple[list[float], list[float], list[float]]:
-    """Интегрирует задачу Коши при заданном начальном наклоне alpha."""
     xs = [x0]
     ys = [y0]
     vs = [alpha]
@@ -40,7 +37,7 @@ def integrate(
 
     for _ in range(steps):
         y, v = rk4_step(x, y, v, h)
-        x = round(x + h, 12)  # устраняем накопление ошибок сложения
+        x = round(x + h, 12)
         xs.append(x)
         ys.append(y)
         vs.append(v)
@@ -49,30 +46,43 @@ def integrate(
 
 
 def shooting(
-    x0: float,
-    xb: float,
-    y0: float,
-    yb: float,
-    h: float,
-    alpha0: float,
-    alpha1: float,
-    tol: float = 1e-8,
-    max_iter: int = 30,
+        x0: float,
+        xb: float,
+        y0: float,
+        yb: float,
+        h: float,
+        alpha0: float,
+        alpha1: float,
+        tol: float = 1e-8,
+        max_iter: int = 30,
 ) -> tuple[list[float], list[float], list[float], float, list[dict]]:
-    """Метод стрельбы с использованием метода секущих."""
     steps = int(round((xb - x0) / h))
     history: list[dict] = []
 
-    xs_prev, ys_prev, vs_prev = integrate(alpha0, x0, y0, h, steps)
+    xs_prev, ys_prev, _ = integrate(alpha0, x0, y0, h, steps)
     res_prev = ys_prev[-1] - yb
     history.append(
-        {"iter": 0, "alpha": alpha0, "y_end": ys_prev[-1], "residual": res_prev}
+        {
+            "iter": 0,
+            "alpha": alpha0,
+            "y_end": ys_prev[-1],
+            "residual": res_prev,
+            "xs": xs_prev,
+            "ys": ys_prev,
+        }
     )
 
     xs_curr, ys_curr, vs_curr = integrate(alpha1, x0, y0, h, steps)
     res_curr = ys_curr[-1] - yb
     history.append(
-        {"iter": 1, "alpha": alpha1, "y_end": ys_curr[-1], "residual": res_curr}
+        {
+            "iter": 1,
+            "alpha": alpha1,
+            "y_end": ys_curr[-1],
+            "residual": res_curr,
+            "xs": xs_curr,
+            "ys": ys_curr,
+        }
     )
 
     iter_idx = 1
@@ -84,7 +94,7 @@ def shooting(
         alpha_next = alpha1 - res_curr * (alpha1 - alpha0) / denom
 
         alpha0, res_prev = alpha1, res_curr
-        xs_prev, ys_prev, vs_prev = xs_curr, ys_curr, vs_curr
+        xs_prev, ys_prev = xs_curr, ys_curr
 
         alpha1 = alpha_next
         xs_curr, ys_curr, vs_curr = integrate(alpha1, x0, y0, h, steps)
@@ -97,6 +107,8 @@ def shooting(
                 "alpha": alpha1,
                 "y_end": ys_curr[-1],
                 "residual": res_curr,
+                "xs": xs_curr,
+                "ys": ys_curr,
             }
         )
 
@@ -109,25 +121,66 @@ def shooting(
 
 
 def fmt(value: float, width: int = 12, precision: int = 6) -> str:
-    """Форматирует число без экспоненциальной записи."""
     return f"{value:{width}.{precision}f}"
 
 
 def exact_solution(x: float) -> float:
-    """Аналитическое решение из условия задачи."""
     return x * math.tan(x) + math.tan(x) - x + 1
 
 
-def plot_solutions(xs: list[float], ys: list[float], x_start: float, x_end: float) -> None:
-    """Строит графики численного и точного решений."""
+def plot_solutions(
+        xs: list[float], ys: list[float], x_start: float, x_end: float
+) -> None:
     dense_x = np.arange(x_start, x_end + 0.01, 0.01)
     dense_y = [exact_solution(x) for x in dense_x]
 
     plt.figure(figsize=(8, 5))
     plt.plot(dense_x, dense_y, label="Аналитическое решение", linewidth=2)
-    plt.plot(xs, ys, "o-", label="Численное решение (РК4)", markersize=4)
+    plt.plot(xs, ys, "o-", label="Численное решение", markersize=4)
 
     plt.title("Сравнение численного и аналитического решений")
+    plt.xlabel("x")
+    plt.ylabel("y(x)")
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_shooting_iterations(history: list[dict], x_end: float, y_end: float) -> None:
+    plt.figure(figsize=(8, 5))
+    overshoot_color = "tab:red"
+    undershoot_color = "tab:blue"
+    exact_color = "tab:green"
+
+    for item in history:
+        xs = item["xs"]
+        ys = item["ys"]
+        residual = item["residual"]
+
+        if abs(residual) < 1e-10:
+            verdict = "точное попадание"
+            color = exact_color
+            linestyle = "-"
+        elif residual > 0:
+            verdict = "перелёт"
+            color = overshoot_color
+            linestyle = "--"
+        else:
+            verdict = "недолёт"
+            color = undershoot_color
+            linestyle = "--"
+
+        plt.plot(
+            xs,
+            ys,
+            label=f"k={item['iter']} ({verdict})",
+            color=color,
+            linestyle=linestyle,
+        )
+
+    plt.scatter([x_end], [y_end], color="black", marker="x", s=80, label="Цель y(b)")
+    plt.title("Итерации метода секущих (стрельба)")
     plt.xlabel("x")
     plt.ylabel("y(x)")
     plt.grid(True, linestyle="--", alpha=0.5)
@@ -143,8 +196,8 @@ def main() -> None:
     y_end = 6.044
     h = 0.11
 
-    alpha_guess_0 = 4.0
-    alpha_guess_1 = 8.0
+    alpha_guess_0 = 4
+    alpha_guess_1 = 8
 
     xs, ys, vs, alpha, history = shooting(
         x_start,
@@ -191,6 +244,7 @@ def main() -> None:
         f"\nМаксимальная абсолютная погрешность на сетке: {fmt(max_error, precision=6)}"
     )
 
+    plot_shooting_iterations(history, x_end, y_end)
     plot_solutions(xs, ys, x_start, x_end)
 
 
