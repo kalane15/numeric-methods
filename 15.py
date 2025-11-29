@@ -8,17 +8,14 @@ import numpy as np
 
 
 def ode_rhs(x: float, y: float) -> float:
-    """Правая часть исходного ОДУ."""
-    return (math.sqrt(y**2 + x**2) - y) / -x
+    return (math.sqrt(y ** 2 + x ** 2) - y) / -x
 
 
 def analytic_solution(x: float) -> float:
-    """Аналитическое решение задачи Коши."""
-    return x * math.sinh(math.log(1/x))
+    return x * math.sinh(math.log(1 / x))
 
 
 Tableau = Dict[str, Any]
-
 
 EXPLICIT_TABLEAUS: List[Tableau] = [
     {
@@ -38,6 +35,16 @@ EXPLICIT_TABLEAUS: List[Tableau] = [
         "implicit": False,
     },
     {
+        "name": "Метод Хойна (3 порядок)",
+        "order": 3,
+        "c": (0.0, 1.0 / 3.0, 2.0 / 3.0),
+        "a": ((0.0, 0.0, 0.0),
+              (1.0/3.0, 0.0, 0.0),
+              (0.0, 2.0/3.0, 0.0)),
+        "b": (1.0/4.0, 0.0, 3.0/4.0),
+        "implicit": False,
+    },
+    {
         "name": "Формула Гилла",
         "order": 4,
         "c": (0.0, 0.5, 0.5, 1.0),
@@ -45,13 +52,12 @@ EXPLICIT_TABLEAUS: List[Tableau] = [
             (0.0, 0.0, 0.0, 0.0),
             (0.5, 0.0, 0.0, 0.0),
             ((math.sqrt(2) - 1.0) / 2.0, 1.0 - 1.0 / math.sqrt(2), 0.0, 0.0),
-            (0.0, -1.0/math.sqrt(2), 1.0 + 1.0 / math.sqrt(2), 0.0),
+            (0.0, -1.0 / math.sqrt(2), 1.0 + 1.0 / math.sqrt(2), 0.0),
         ),
-        "b": (1.0 / 6.0, 1.0 / 3.0 - 1.0 / (3.0*math.sqrt(2.0)), 1.0 / 3.0 + 1.0 / (3.0*math.sqrt(2.0)), 1.0 / 6.0),
+        "b": (1.0 / 6.0, 1.0 / 3.0 - 1.0 / (3.0 * math.sqrt(2.0)), 1.0 / 3.0 + 1.0 / (3.0 * math.sqrt(2.0)), 1.0 / 6.0),
         "implicit": False,
     },
 ]
-
 
 IMPLICIT_TABLEAUS: List[Tableau] = [
     {
@@ -60,14 +66,6 @@ IMPLICIT_TABLEAUS: List[Tableau] = [
         "c": (1.0,),
         "a": ((1.0,),),
         "b": (1.0,),
-        "implicit": True,
-    },
-    {
-        "name": "Метод Хаммера-Холлингсуорта",
-        "order": 2,
-        "c": (0.0, 2.0/3.0),
-        "a": ((0.0, 0.0), (1.0/3.0, 1.0/3.0)),
-        "b": (0.25, 0.75),
         "implicit": True,
     },
     {
@@ -94,7 +92,6 @@ IMPLICIT_TABLEAUS: List[Tableau] = [
 
 
 def build_grid(a: float, b: float, h: float) -> List[float]:
-    """Создаёт равномерную сетку, гарантируя включение правого конца."""
     xs: List[float] = []
     n = 0
     while True:
@@ -141,59 +138,17 @@ def solve_linear_system(matrix: Sequence[Sequence[float]], rhs: Sequence[float])
     return x
 
 
-def numerical_jacobian(
-    func: Callable[[Sequence[float]], List[float]],
-    point: Sequence[float],
-    base_value: Sequence[float] | None = None,
-) -> List[List[float]]:
-    s = len(point)
-    jac = [[0.0 for _ in range(s)] for _ in range(s)]
-    if base_value is None:
-        base_value = func(point)
-    for j in range(s):
-        step = 1e-8 * max(1.0, abs(point[j]))
-        perturbed = list(point)
-        perturbed[j] += step
-        values = func(perturbed)
-        for i in range(s):
-            jac[i][j] = (values[i] - base_value[i]) / step
-    return jac
-
-
-def fixed_point_iteration(
-    tableau: Tableau,
-    h: float,
-    x_cur: float,
-    y_cur: float,
-    initial: Sequence[float],
-    rhs: Callable[[float, float], float],
-) -> List[float]:
-    s = len(tableau["c"])
-    stages = list(initial)
-    for _ in range(25):
-        new_stages: List[float] = []
-        for i in range(s):
-            arg_y = y_cur
-            for j in range(s):
-                arg_y += h * tableau["a"][i][j] * stages[j]
-            new_stages.append(rhs(x_cur + tableau["c"][i] * h, arg_y))
-        delta = max(abs(ns - os) for ns, os in zip(new_stages, stages))
-        stages = new_stages
-        if delta < 1e-12:
-            break
-    return stages
-
-
 def solve_stages(
-    tableau: Tableau,
-    h: float,
-    x_cur: float,
-    y_cur: float,
-    explicit: bool,
-    rhs: Callable[[float, float], float],
+        tableau: Tableau,
+        h: float,
+        x_cur: float,
+        y_cur: float,
+        explicit: bool,
+        rhs: Callable[[float, float], float],
 ) -> List[float]:
     s = len(tableau["c"])
     stages = [0.0 for _ in range(s)]
+
     if explicit:
         for i in range(s):
             arg_y = y_cur
@@ -211,26 +166,40 @@ def solve_stages(
             res.append(values[i] - rhs(x_cur + tableau["c"][i] * h, arg_y))
         return res
 
+    def jacobian(values: Sequence[float]) -> List[List[float]]:
+        J = [[0.0 for _ in range(s)] for _ in range(s)]
+        for i in range(s):
+            x_i = x_cur + tableau["c"][i] * h
+            arg_y = y_cur
+            for j in range(s):
+                arg_y += h * tableau["a"][i][j] * values[j]
+            dfdy = (arg_y / math.sqrt(arg_y ** 2 + x_i ** 2) - 1) / (-x_i)
+            for j in range(s):
+                J[i][j] = (1.0 if i == j else 0.0) - h * tableau["a"][i][j] * dfdy
+        return J
+
     guess = [rhs(x_cur + c_i * h, y_cur) for c_i in tableau["c"]]
     stages = guess[:]
+
     for _ in range(12):
         res = residual(stages)
         if max_norm(res) < 1e-12:
             return stages
-        jac = numerical_jacobian(residual, stages, res)
+        jac = jacobian(stages)
         delta = solve_linear_system(jac, [-value for value in res])
         stages = [k + dk for k, dk in zip(stages, delta)]
         if max(abs(dk) for dk in delta) < 1e-12:
             return stages
-    return fixed_point_iteration(tableau, h, x_cur, y_cur, stages, rhs)
+
+    return stages
 
 
 def rk_step(
-    tableau: Tableau,
-    h: float,
-    x_cur: float,
-    y_cur: float,
-    rhs: Callable[[float, float], float],
+        tableau: Tableau,
+        h: float,
+        x_cur: float,
+        y_cur: float,
+        rhs: Callable[[float, float], float],
 ) -> float:
     explicit = not tableau["implicit"]
     stages = solve_stages(tableau, h, x_cur, y_cur, explicit, rhs)
@@ -239,12 +208,12 @@ def rk_step(
 
 
 def solve_cauchy(
-    tableau: Tableau,
-    x0: float,
-    x_end: float,
-    y0: float,
-    h: float,
-    rhs: Callable[[float, float], float],
+        tableau: Tableau,
+        x0: float,
+        x_end: float,
+        y0: float,
+        h: float,
+        rhs: Callable[[float, float], float],
 ) -> Tuple[List[float], List[float]]:
     xs = build_grid(x0, x_end, h)
     ys = [y0]
@@ -257,12 +226,12 @@ def solve_cauchy(
 
 
 def collect_results(
-    tableaus: Sequence[Tableau],
-    h: float,
-    x0: float,
-    x_end: float,
-    y0: float,
-    rhs: Callable[[float, float], float],
+        tableaus: Sequence[Tableau],
+        h: float,
+        x0: float,
+        x_end: float,
+        y0: float,
+        rhs: Callable[[float, float], float],
 ) -> List[dict]:
     results = []
     for tableau in tableaus:
@@ -305,9 +274,9 @@ def plot_results(explicit_results: Sequence[dict], implicit_results: Sequence[di
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
     for ax, res_set, title in zip(
-        axes,
-        (explicit_results, implicit_results),
-        ("Явные схемы", "Неявные схемы"),
+            axes,
+            (explicit_results, implicit_results),
+            ("Явные схемы", "Неявные схемы"),
     ):
         ax.plot(smooth_x, smooth_y, color="black", label="Аналитика", linestyle="--")
         for res in res_set:
@@ -347,4 +316,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
