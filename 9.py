@@ -74,7 +74,7 @@ def build_lagrange(x_t, y_t, x_star, start, stop):
 
     omega2 = abs(error(x_star, x_quad))
     print(f"Value of L_{stop-start - 1}(x*) = {p2_star}")
-    print(f"Check: L_{stop-start}({x_check}) = {p2_check} (expected: {y_check})")
+    print(f"Check: L_{stop-start - 1}({x_check}) = {p2_check} (expected: {y_check})")
     print(f"|ω(x*)| = {omega2}")
     print()
 

@@ -60,7 +60,6 @@ def get_newton_error(x, x_star, degree):
 
 
 def build_newton(x_t, y_t, x_star, start, stop, degree):
-    print(start, stop)
     x_quad = x_t[start:stop]
     y_quad = y_t[start:stop]
 
@@ -77,10 +76,9 @@ def build_newton(x_t, y_t, x_star, start, stop, degree):
         y.append(newton_eval(x_quad, dd, i, degree))
 
     err = get_newton_error(x_quad, x_star, degree)
-    print(f"Value of L_2(x*) = {p2_star}")
-    print(f"Check: L_2({x_check}) = {p2_check} (expected: {y_check})")
+    print(f"Value of L_{degree}(x*) = {p2_star}")
+    print(f"Check: L_{degree}({x_check}) = {p2_check} (expected: {y_check})")
     print(f"Approximate error  = {err}")
-    print()
 
     return x, y, err, p2_star, x_quad, y_quad
 
