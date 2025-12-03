@@ -142,6 +142,8 @@ def main():
         yd_star = (B[target_i] +
                   2*C[target_i] * dx +
                   3*D[target_i] * (dx ** 2))
+        ydd_star = (2*C[target_i] +
+                  6*D[target_i] * dx)
 
         print(f"Error analysis:")
         print(f" Maximum grid pitch H = {H:.4f}")
@@ -155,6 +157,7 @@ def main():
         print(f"  S({x_star}) = {y_star:.7f}\n")
 
         print(f"Spline derivative at x*: {yd_star}\n")
+        print(f"Spline derivative 2 at x*: {ydd_star}\n")
 
         print(f"Spline Coefficients on segment i = {target_i}:")
         print(f"  a_{target_i} = {A[target_i]:.7f}")

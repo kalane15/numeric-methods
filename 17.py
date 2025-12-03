@@ -118,8 +118,8 @@ def print_table(xs: List[float], exact: List[float], sol1: List[float], sol2: Li
         err1 = abs(sol1[i] - exact[i])
         err2 = abs(sol2[i] - exact[i])
         print(
-            f"{i:3d} {x:8.3f} {exact[i]:15.6f} "
-            f"{sol1[i]:15.6f} {err1:15.6f} "
+            f"{i:3d} {x:8.3f} {exact[i]:15.6f}"
+            f"{sol1[i]:15.6f} {err1:15.6f}"
             f"{sol2[i]:15.6f} {err2:15.6f}"
         )
 
