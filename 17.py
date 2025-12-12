@@ -34,19 +34,16 @@ def analytic_solution(x: float) -> float:
 
 
 def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
-    n_intervals = round((B - A) / H)  # количество интервалов
-    size = n_intervals + 1  # количество узлов
+    n_intervals = round((B - A) / H)
+    size = n_intervals + 1
     matrix = [[0.0 for _ in range(size)] for _ in range(size)]
     rhs = [0.0 for _ in range(size)]
 
-    # Левая граница: y(a) + y'(a) = LEFT_BC
     if order == 1:
-        # Односторонняя разность для y'(a)
-        matrix[0][0] = 1.0 - 1.0 / H  # для y(a)
-        matrix[0][1] = 1.0 / H  # для y_1 (разность для y')
+        matrix[0][0] = 1.0 - 1.0 / H
+        matrix[0][1] = 1.0 / H
         rhs[0] = LEFT_BC
     elif order == 2:
-        # Второй порядок аппроксимации для y'(a)
         matrix[0][0] = 1.0 - 3.0 / (2 * H)
         matrix[0][1] = 4.0 / (2 * H)
         matrix[0][2] = -1.0 / (2 * H)
@@ -54,7 +51,6 @@ def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
     else:
         raise ValueError("Допустимые порядки аппроксимации: 1 или 2.")
 
-    # Основная часть для внутренних точек
     for k in range(1, size - 1):
         xk = A + k * H
         matrix[k][k - 1] = 1.0 / (H * H) - p(xk) / (2.0 * H)
@@ -62,8 +58,7 @@ def build_system(order: int) -> Tuple[List[List[float]], List[float]]:
         matrix[k][k + 1] = 1.0 / (H * H) + p(xk) / (2.0 * H)
         rhs[k] = f(xk)
 
-    # Правая граница: y(b) = RIGHT_BC
-    matrix[-1][-1] = 1.0  # только для y(b)
+    matrix[-1][-1] = 1.0
     rhs[-1] = RIGHT_BC
 
     return matrix, rhs
